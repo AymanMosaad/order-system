@@ -167,38 +167,47 @@
     <h3>📦 تفاصيل الأصناف</h3>
     <table>
         <thead>
-            <tr>
-                <th>كود الصنف</th>
-                <th>النوع</th>
-                <th>اسم الصنف</th>
-                <th>اللون</th>
-                <th>المقاس</th>
-                <th>فرز أول</th>
-                <th>فرز ثاني</th>
-                <th>فرز ثالث</th>
-                <th>الإجمالي</th>
-                <th>حذف</th>
-            </tr>
-        </thead>
-        <tbody id="items">
-            @foreach($order->items as $index => $item)
-            <tr>
-                <td>
-                    <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
-                    <input type="text" name="items[{{ $index }}][item_code]" value="{{ $item->item_code }}" required>
-                </td>
-                <td><input type="text" name="items[{{ $index }}][type]" value="{{ $item->type }}"></td>
-                <td><input type="text" name="items[{{ $index }}][name]" value="{{ $item->name }}"></td>
-                <td><input type="text" name="items[{{ $index }}][color]" value="{{ $item->color }}"></td>
-                <td><input type="text" name="items[{{ $index }}][size]" value="{{ $item->size }}"></td>
-                <td><input type="number" name="items[{{ $index }}][grade1]" value="{{ $item->grade1 }}" min="0" oninput="calcTotal({{ $index }})"></td>
-                <td><input type="number" name="items[{{ $index }}][grade2]" value="{{ $item->grade2 }}" min="0" oninput="calcTotal({{ $index }})"></td>
-                <td><input type="number" name="items[{{ $index }}][grade3]" value="{{ $item->grade3 }}" min="0" oninput="calcTotal({{ $index }})"></td>
-                <td><input type="number" name="items[{{ $index }}][total]" value="{{ $item->total }}" readonly id="total_{{ $index }}"></td>
-                <td><button type="button" class="btn btn-delete" onclick="removeRow(this)">✖</button></td>
-            </tr>
-            @endforeach
-        </tbody>
+    <tr>
+        <th>كود الفرز الأول</th>
+        <th>كود الفرز الثاني</th>
+        <th>كود الفرز الثالث</th>
+        <th>النوع</th>
+        <th>اسم الصنف</th>
+        <th>اللون</th>
+        <th>المقاس</th>
+        <th>فرز أول</th>
+        <th>فرز ثاني</th>
+        <th>فرز ثالث</th>
+        <th>الإجمالي</th>
+        <th>حذف</th>
+    </tr>
+</thead>
+<tbody id="items">
+    @foreach($order->items as $index => $item)
+    <tr>
+        <td>
+            <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
+            <input type="text" name="items[{{ $index }}][item_code]" value="{{ $item->item_code ?? '' }}" required>
+        </td>
+        <td>
+            <input type="text" name="items[{{ $index }}][item_code2]" value="{{ $item->item_code2 ?? '' }}">
+        </td>
+        <td>
+            <input type="text" name="items[{{ $index }}][item_code3]" value="{{ $item->item_code3 ?? '' }}">
+        </td>
+        <td><input type="text" name="items[{{ $index }}][type]" value="{{ $item->type ?? '' }}"></td>
+        <td><input type="text" name="items[{{ $index }}][name]" value="{{ $item->name ?? '' }}"></td>
+        <td><input type="text" name="items[{{ $index }}][color]" value="{{ $item->color ?? '' }}"></td>
+        <td><input type="text" name="items[{{ $index }}][size]" value="{{ $item->size ?? '' }}"></td>
+        <td><input type="number" name="items[{{ $index }}][grade1]" value="{{ $item->grade1 ?? 0 }}" min="0"></td>
+        <td><input type="number" name="items[{{ $index }}][grade2]" value="{{ $item->grade2 ?? 0 }}" min="0"></td>
+        <td><input type="number" name="items[{{ $index }}][grade3]" value="{{ $item->grade3 ?? 0 }}" min="0"></td>
+        <td><input type="number" name="items[{{ $index }}][total]" value="{{ $item->total ?? 0 }}" readonly></td>
+        <td><button type="button" class="btn-delete">حذف</button></td>
+    </tr>
+    @endforeach
+</tbody>
+
     </table>
 
     <button type="button" class="btn btn-add" onclick="addItem()">➕ إضافة صنف</button>
@@ -217,7 +226,9 @@ function addItem() {
     const row = document.createElement('tr');
 
     row.innerHTML = `
-        <td><input type="text" name="items[${index}][item_code]" placeholder="كود الصنف" required></td>
+        <td><input type="text" name="items[${index}][item_code]" placeholder="كود الفرز الأول" required></td>
+        <td><input type="text" name="items[${index}][item_code2]" placeholder="كود الفرز الثاني" required></td>
+        <td><input type="text" name="items[${index}][item_code3]" placeholder="كود الفرز الثالث" required></td>
         <td><input type="text" name="items[${index}][type]" placeholder="النوع"></td>
         <td><input type="text" name="items[${index}][name]" placeholder="اسم الصنف"></td>
         <td><input type="text" name="items[${index}][color]" placeholder="اللون"></td>
