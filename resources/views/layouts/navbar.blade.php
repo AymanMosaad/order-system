@@ -3,24 +3,39 @@
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <!-- الشعار / العنوان -->
         <div style="font-weight:bold; font-size:18px;">
-            🏭 جلوريا للسيراميك والبورسلين
+            <a href="{{ route('home') }}" style="color:white; text-decoration:none;">🏭 جلوريا للسيراميك والبورسلين</a>
         </div>
 
         <!-- الروابط -->
         <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
             @auth
-                <!-- الطلبات -->
-                <a href="{{ route('orders.index') }}" style="color:white; text-decoration:none;">📋 كل الطلبات</a>
+                <!-- روابط مشتركة للجميع (المستخدم العادي والمدير) -->
                 <a href="{{ route('orders.create') }}" style="color:white; text-decoration:none;">➕ طلب جديد</a>
-                <a href="{{ route('products.index') }}" style="color:white; text-decoration:none;">📦 الأصناف</a>
-                <a href="{{ route('orders.report') }}" style="color:white; text-decoration:none;">📊 التقارير</a>
-
-                <!-- الاستيراد والقالب -->
-                <a href="{{ route('products.importPage') }}" style="color:white; text-decoration:none;">⬆️ استيراد</a>
-                <a href="{{ route('products.downloadTemplate') }}" style="color:white; text-decoration:none;">⬇️ قالب</a>
-
-                <!-- لوحة المستخدم (إن كانت موجودة عندك) -->
                 <a href="{{ route('orders.userDashboard') }}" style="color:white; text-decoration:none;">👤 لوحتي</a>
+
+                <!-- روابط خاصة بالمدير فقط -->
+                @if(Auth::user()->is_admin == 1)
+                    <a href="{{ route('admin.dashboard') }}" style="color:white; text-decoration:none;">👑 لوحة المدير</a>
+                    <a href="{{ route('orders.index') }}" style="color:white; text-decoration:none;">📋 كل الطلبات</a>
+                    <a href="{{ route('products.index') }}" style="color:white; text-decoration:none;">📦 الأصناف</a>
+                    <a href="{{ route('orders.advancedReport') }}" style="color:white; text-decoration:none;">📊 تقرير متقدم</a>
+                    <a href="{{ route('orders.report') }}" style="color:white; text-decoration:none;">📈 تقرير الأصناف</a>
+                    <a href="{{ route('products.stockReport') }}" style="color:white; text-decoration:none;">📊 تقرير الرصيد</a>
+                    <a href="{{ route('products.importPage') }}" style="color:white; text-decoration:none;">⬆️ استيراد</a>
+                    <a href="{{ route('products.downloadTemplate') }}" style="color:white; text-decoration:none;">⬇️ قالب</a>
+
+                    <!-- ========== أيقونة الإشعارات ========== -->
+                    <div style="position: relative; display: inline-block;">
+                        <a href="{{ route('notifications.index') }}" style="color:white; text-decoration:none; position: relative;">
+                            🔔
+                            @if(Auth::user()->unreadNotifications->count() > 0)
+                                <span style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold;">
+                                    {{ Auth::user()->unreadNotifications->count() }}
+                                </span>
+                            @endif
+                        </a>
+                    </div>
+                @endif
 
                 <!-- تسجيل الخروج (POST) -->
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">

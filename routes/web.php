@@ -3,106 +3,120 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 // ===========================
 // Auth Routes
 // ===========================
 Route::middleware('guest')->group(function () {
     Route::get('login', fn() => view('auth.login'))->name('login');
-    Route::post('login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('register', fn() => view('auth.register'))->name('register');
-    Route::post('register', [App\Http\Controllers\Auth\RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store']);
 });
 
 Route::middleware('auth')->group(function () {
-    Route::post('logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
 // ===========================
-// الصفحة الرئيسية
+// الصفحة الرئيسية (للمستخدمين غير المسجلين)
 // ===========================
-Route::get('/', [OrderController::class, 'frontPage'])->name('orders.frontPage');
+Route::get('/', function () {
+    if (Auth::check()) {
+        if (Auth::user()->is_admin == 1) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('orders.userDashboard');
+    }
+    return view('home');
+})->name('home');
 
 // ===========================
-// الطلبيات - عام (بدون Auth)
+// الطلبيات - Routes للمستخدمين المسجلين (كل المستخدمين)
 // ===========================
-Route::prefix('orders')->name('orders.')->group(function() {
-    Route::get('index', [OrderController::class, 'index'])->name('index');
-    Route::get('show/{id}', [OrderController::class, 'show'])->name('show');
-    Route::get('report', [OrderController::class, 'frontPage'])->name('report');
-});
-
-// ===========================
-// الطلبيات - محمية بـ Auth
-// ===========================
-Route::middleware('auth')->prefix('orders')->name('orders.')->group(function () {
-    // لوحة تحكم المستخدم
+Route::middleware('auth')->prefix('orders')->name('orders.')->group(function() {
+    // Routes المتاحة للمستخدم العادي والمدير
     Route::get('user-dashboard', [OrderController::class, 'userDashboard'])->name('userDashboard');
-
-    // إنشاء طلب جديد
     Route::get('create', [OrderController::class, 'create'])->name('create');
     Route::post('store', [OrderController::class, 'store'])->name('store');
-
-    // تعديل طلب
+    Route::get('show/{id}', [OrderController::class, 'show'])->name('show');
     Route::get('edit/{id}', [OrderController::class, 'edit'])->name('edit');
-    Route::post('update/{id}', [OrderController::class, 'update'])->name('update');
-
-    // حذف طلب
+    Route::put('update/{id}', [OrderController::class, 'update'])->name('update');
     Route::delete('delete/{id}', [OrderController::class, 'destroy'])->name('destroy');
-});
 
-// ===========================
-// الأصناف - عام (بدون Auth)
-// ===========================
-Route::prefix('products')->name('products.')->group(function() {
-    Route::get('index', [ProductController::class, 'index'])->name('index');
-    Route::get('show/{id}', [ProductController::class, 'show'])->name('show');
-    Route::get('report', [ProductController::class, 'report'])->name('report');
-});
-
-// ===========================
-// الأصناف - محمية بـ Auth
-// ===========================
-Route::middleware('auth')->prefix('products')->name('products.')->group(function() {
-    // إنشاء صنف جديد
-    Route::get('create', [ProductController::class, 'create'])->name('create');
-    Route::post('store', [ProductController::class, 'store'])->name('store');
-
-    // تعديل صنف
-    Route::get('{id}/edit', [ProductController::class, 'edit'])->name('edit');
-    Route::post('{id}/update', [ProductController::class, 'update'])->name('update');
-
-    // حذف صنف
-    Route::delete('{id}/delete', [ProductController::class, 'destroy'])->name('destroy');
-
-    // تعديل الرصيد
-    Route::post('{id}/adjust-stock', [ProductController::class, 'adjustStock'])->name('adjustStock');
-
-    // صفحة الاستيراد (GET) + تنفيذ الاستيراد (POST)
-    Route::get('import-page', [ProductController::class, 'importPage'])->name('importPage');
-    Route::post('import', [ProductController::class, 'import'])->name('import');
-
-    // تحميل القالب
-    Route::get('download-template', [ProductController::class, 'downloadTemplate'])->name('downloadTemplate');
-
-    // ✅ حماية إضافية: أي GET على /products/import يرجّعك لصفحة الرفع
-    Route::get('import', function () {
-        return redirect()->route('products.importPage');
+    // Routes الخاصة بالمدير فقط
+    Route::middleware('admin')->group(function() {
+        Route::get('index', [OrderController::class, 'index'])->name('index');
+        Route::get('report', [OrderController::class, 'frontPage'])->name('report');
+        Route::get('advanced-report', [OrderController::class, 'advancedReport'])->name('advancedReport');
     });
-
-    // ────────────────────────────────────────────────
-// تعديلات إضافية / تصحيح للروتات (إذا كانت ناقصة أو تحتاج تحديث)
-// يمكن حذفها لو مش محتاجها
-// ────────────────────────────────────────────────
-
-Route::middleware('auth')->group(function () {
-
-    // لو الـ resource مش موجودة بالكامل، ممكن نضيفها هنا
-    // لكن بما إن عندك روتات يدوية لكل action، ممكن ما نحتاجهاش دلوقتي
-
-    // مثال: لو عايز تضيف action جديد لتغيير حالة الطلبية لاحقًا
-    // Route::post('orders/{order}/change-status', [OrderController::class, 'changeStatus'])->name('orders.changeStatus');
-
 });
+
+// ===========================
+// الأصناف - Routes
+// ===========================
+// Routes العامة (متاحة للجميع)
+Route::prefix('products')->name('products.')->group(function() {
+    Route::get('get-by-name/{name}', [ProductController::class, 'getByName'])->name('getByName');
+});
+
+// Routes للمستخدمين المسجلين
+Route::middleware('auth')->prefix('products')->name('products.')->group(function() {
+    // Routes المتاحة للمستخدم العادي والمدير
+    Route::get('show/{id}', [ProductController::class, 'show'])->name('show');
+
+    // Routes الخاصة بالمدير فقط
+    Route::middleware('admin')->group(function() {
+        Route::get('index', [ProductController::class, 'index'])->name('index');
+        Route::get('report', [ProductController::class, 'report'])->name('report');
+        Route::get('create', [ProductController::class, 'create'])->name('create');
+        Route::post('store', [ProductController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('{id}/update', [ProductController::class, 'update'])->name('update');
+        Route::delete('{id}/delete', [ProductController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/adjust-stock', [ProductController::class, 'adjustStock'])->name('adjustStock');
+        Route::get('import-page', [ProductController::class, 'importPage'])->name('importPage');
+        Route::post('import', [ProductController::class, 'import'])->name('import');
+        Route::get('download-template', [ProductController::class, 'downloadTemplate'])->name('downloadTemplate');
+
+        // ========== تقرير الرصيد ==========
+        Route::get('stock-report', [ProductController::class, 'stockReport'])->name('stockReport');
+    });
+});
+
+// ===========================
+// Route لوحة تحكم المدير
+// ===========================
+Route::middleware(['auth', 'admin'])->get('/admin/dashboard', [OrderController::class, 'adminDashboard'])->name('admin.dashboard');
+
+// ===========================
+// Routes الإشعارات
+// ===========================
+Route::middleware(['auth', 'admin'])->prefix('notifications')->name('notifications.')->group(function() {
+    Route::get('/', function() {
+        $notifications = auth()->user()->notifications()->latest()->paginate(20);
+        return view('notifications.index', ['notifications' => $notifications]);
+    })->name('index');
+
+    Route::post('/mark-read', function() {
+        $notification = auth()->user()->notifications()->where('id', request('id'))->first();
+        if ($notification) {
+            $notification->markAsRead();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false], 404);
+    })->name('markRead');
+
+    Route::post('/mark-all-read', function() {
+        auth()->user()->unreadNotifications->markAsRead();
+        return redirect()->back()->with('success', 'تم تحديد جميع الإشعارات كمقروءة');
+    })->name('markAllRead');
+
+    Route::post('/mark-as-read', function() {
+        auth()->user()->unreadNotifications->markAsRead();
+        return redirect()->back()->with('success', 'تم تحديد جميع الإشعارات كمقروءة');
+    })->name('markAsRead');
 });

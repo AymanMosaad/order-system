@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 /**
  * يستورد الأصناف + الأرصدة من Excel
- * الآن يدعم إنشاء الصنف لو مش موجود (updateOrCreate)
+ * يدعم إنشاء الصنف لو مش موجود (updateOrCreate)
  */
 class ProductsImport extends DefaultValueBinder implements ToCollection, WithHeadingRow, WithCustomValueBinder
 {
@@ -39,9 +39,10 @@ class ProductsImport extends DefaultValueBinder implements ToCollection, WithHea
             try {
                 $row = (array) $row;
 
+                // دعم عدة صيغ للأعمدة
                 $itemCode = trim((string) ($row['كود الصنف'] ?? $row[0] ?? ''));
                 $itemName = $row['اسم الصنف'] ?? $row[1] ?? 'غير محدد';
-                $unit     = $row['الوحدة'] ?? $row[2] ?? null;
+                $unit     = $row['الوحدة'] ?? $row[2] ?? 'سيراميك';
                 $stockRaw = $row['الرصيد'] ?? $row[3] ?? 0;
 
                 $stockVal = $this->toNumber($stockRaw);
@@ -53,13 +54,13 @@ class ProductsImport extends DefaultValueBinder implements ToCollection, WithHea
                     continue;
                 }
 
-                // === التعديل المهم: يخلق الصنف لو مش موجود ===
+                // إنشاء أو تحديث المنتج
                 $product = Product::updateOrCreate(
                     ['item_code' => $itemCode],
                     [
                         'name'  => $itemName,
-                        'type'  => $unit ?? 'غير محدد',
-                        // أضف هنا أي حقل إضافي موجود في موديل Product (color, size...)
+                        'type'  => $unit,
+                        'is_active' => true,
                     ]
                 );
 
@@ -68,7 +69,7 @@ class ProductsImport extends DefaultValueBinder implements ToCollection, WithHea
                     ['product_id' => $product->id],
                     [
                         'current_stock' => $stockVal,
-                        'min_stock'     => 0, // يمكن تغييره بعدين
+                        'min_stock'     => 0,
                     ]
                 );
 

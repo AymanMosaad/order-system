@@ -3,87 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تعديل الطلبية</title>
+    <title>تعديل الطلبية #{{ $order->id }}</title>
     <style>
         * { box-sizing: border-box; }
-        body {
-            font-family: Arial, sans-serif;
-            direction: rtl;
-            margin: 0;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-        .container { max-width: 1200px; margin: 0 auto; }
+        body { font-family: Arial, sans-serif; direction: rtl; margin: 0; background-color: #f5f5f5; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
         h2, h3 { text-align: center; color: #333; }
-        .box {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin-bottom: 20px;
-            background-color: white;
-            border-radius: 5px;
-        }
-        .form-group {
-            display: inline-block;
-            margin: 10px 5px;
-            width: 30%;
-        }
+        .box { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; background-color: white; border-radius: 5px; }
+        .form-group { display: inline-block; margin: 10px 5px; width: 30%; }
         input, select, textarea {
-            padding: 8px;
-            margin: 5px 0;
-            width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-family: Arial;
+            padding: 8px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 3px; font-size: 13px;
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0,123,255,0.3);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: white;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-        }
-        th {
-            background-color: #333;
-            color: white;
-            font-weight: bold;
-        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.3); }
+        .table-wrapper { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background-color: white; min-width: 1000px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 12px; }
+        th { background-color: #333; color: white; font-weight: bold; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #f9f9f9; }
-        .btn {
-            padding: 10px 15px;
-            margin: 10px 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 3px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+        .stock-info { font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 3px; margin-top: 3px; }
+        .stock-ok { background:#d4edda; color:#155724; }
+        .stock-low { background:#fff3cd; color:#856404; }
+        .stock-danger { background:#f8d7da; color:#721c24; }
+        .btn { padding: 10px 15px; margin: 10px 5px; cursor: pointer; border: none; border-radius: 3px; font-size: 14px; font-weight: bold; }
         .btn-add { background-color: #28a745; color: white; }
-        .btn-add:hover { background-color: #218838; }
-        .btn-save { background-color: #007bff; color: white; }
-        .btn-save:hover { background-color: #0056b3; }
+        .btn-save { background-color: #007bff; color: white; width: 100%; }
         .btn-delete { background-color: #dc3545; color: white; padding: 5px 10px; }
-        .btn-delete:hover { background-color: #c82333; }
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        input[type="number"] { width: 100%; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
@@ -95,7 +41,7 @@
 
     @if ($errors->any())
         <div class="alert alert-danger">
-            <strong>خطأ!</strong>
+            <strong>❌ خطأ!</strong>
             <ul style="margin: 10px 0; padding-right: 20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -106,6 +52,7 @@
 
     <form method="POST" action="{{ route('orders.update', $order->id) }}">
     @csrf
+    @method('PUT')
 
     <div class="box">
         <h3>📋 بيانات الطلبية</h3>
@@ -165,101 +112,102 @@
     </div>
 
     <h3>📦 تفاصيل الأصناف</h3>
-    <table>
-        <thead>
-    <tr>
-        <th>كود الفرز الأول</th>
-        <th>كود الفرز الثاني</th>
-        <th>كود الفرز الثالث</th>
-        <th>النوع</th>
-        <th>اسم الصنف</th>
-        <th>اللون</th>
-        <th>المقاس</th>
-        <th>فرز أول</th>
-        <th>فرز ثاني</th>
-        <th>فرز ثالث</th>
-        <th>الإجمالي</th>
-        <th>حذف</th>
-    </tr>
-</thead>
-<tbody id="items">
-    @foreach($order->items as $index => $item)
-    <tr>
-        <td>
-            <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
-            <input type="text" name="items[{{ $index }}][item_code]" value="{{ $item->item_code ?? '' }}" required>
-        </td>
-        <td>
-            <input type="text" name="items[{{ $index }}][item_code2]" value="{{ $item->item_code2 ?? '' }}">
-        </td>
-        <td>
-            <input type="text" name="items[{{ $index }}][item_code3]" value="{{ $item->item_code3 ?? '' }}">
-        </td>
-        <td><input type="text" name="items[{{ $index }}][type]" value="{{ $item->type ?? '' }}"></td>
-        <td><input type="text" name="items[{{ $index }}][name]" value="{{ $item->name ?? '' }}"></td>
-        <td><input type="text" name="items[{{ $index }}][color]" value="{{ $item->color ?? '' }}"></td>
-        <td><input type="text" name="items[{{ $index }}][size]" value="{{ $item->size ?? '' }}"></td>
-        <td><input type="number" name="items[{{ $index }}][grade1]" value="{{ $item->grade1 ?? 0 }}" min="0"></td>
-        <td><input type="number" name="items[{{ $index }}][grade2]" value="{{ $item->grade2 ?? 0 }}" min="0"></td>
-        <td><input type="number" name="items[{{ $index }}][grade3]" value="{{ $item->grade3 ?? 0 }}" min="0"></td>
-        <td><input type="number" name="items[{{ $index }}][total]" value="{{ $item->total ?? 0 }}" readonly></td>
-        <td><button type="button" class="btn-delete">حذف</button></td>
-    </tr>
-    @endforeach
-</tbody>
 
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>كود الصنف</th>
+                    <th>اسم الصنف</th>
+                    <th>الرصيد المتوفر</th>
+                    <th>الكمية</th>
+                    <th>حذف</th>
+                </tr>
+            </thead>
+            <tbody id="items">
+                @foreach($order->items as $index => $item)
+                <tr>
+                    <td>
+                        <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
+                        <input type="text" name="items[{{ $index }}][item_code]" value="{{ $item->item_code }}" readonly>
+                    </td>
+                    <td>
+                        <input type="text" name="items[{{ $index }}][name]" value="{{ $item->name }}" class="name-input">
+                    </td>
+                    <td>
+                        <div class="stock-info stock-ok" id="stock_{{ $index }}">
+                            متوفر: {{ $item->product?->getCurrentStock() ?? 0 }}
+                        </div>
+                    </td>
+                    <td>
+                        <input type="number" name="items[{{ $index }}][quantity]" value="{{ $item->grade1 ?? 0 }}" min="0">
+                    </td>
+                    <td><button type="button" class="btn btn-delete" onclick="deleteItem(this)">✖</button></td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
     <button type="button" class="btn btn-add" onclick="addItem()">➕ إضافة صنف</button>
     <br><br>
     <button type="submit" class="btn btn-save">💾 حفظ التعديلات</button>
-
     </form>
-
 </div>
 
 <script>
-let index = {{ count($order->items) }};
+let itemIndex = {{ count($order->items) }};
 
 function addItem() {
     const tbody = document.getElementById('items');
     const row = document.createElement('tr');
 
     row.innerHTML = `
-        <td><input type="text" name="items[${index}][item_code]" placeholder="كود الفرز الأول" required></td>
-        <td><input type="text" name="items[${index}][item_code2]" placeholder="كود الفرز الثاني" required></td>
-        <td><input type="text" name="items[${index}][item_code3]" placeholder="كود الفرز الثالث" required></td>
-        <td><input type="text" name="items[${index}][type]" placeholder="النوع"></td>
-        <td><input type="text" name="items[${index}][name]" placeholder="اسم الصنف"></td>
-        <td><input type="text" name="items[${index}][color]" placeholder="اللون"></td>
-        <td><input type="text" name="items[${index}][size]" placeholder="المقاس"></td>
-        <td><input type="number" name="items[${index}][grade1]" value="0" min="0" oninput="calcTotal(${index})"></td>
-        <td><input type="number" name="items[${index}][grade2]" value="0" min="0" oninput="calcTotal(${index})"></td>
-        <td><input type="number" name="items[${index}][grade3]" value="0" min="0" oninput="calcTotal(${index})"></td>
-        <td><input type="number" name="items[${index}][total]" value="0" readonly id="total_${index}"></td>
-        <td><button type="button" class="btn btn-delete" onclick="removeRow(this)">✖</button></td>
+        <td><input type="text" name="items[${itemIndex}][item_code]" readonly></td>
+        <td><input type="text" name="items[${itemIndex}][name]" class="name-input" placeholder="اسم الصنف" list="productNamesList"></td>
+        <td><div class="stock-info" id="stock_${itemIndex}">---</div></td>
+        <td><input type="number" name="items[${itemIndex}][quantity]" value="0" min="0"></td>
+        <td><button type="button" class="btn btn-delete" onclick="deleteItem(this)">✖</button></td>
     `;
 
     tbody.appendChild(row);
-    index++;
+    itemIndex++;
 }
 
-function removeRow(btn) {
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('name-input')) {
+        const name = e.target.value.trim();
+        if (name.length < 3) return;
+
+        const rowIndex = parseInt(e.target.name.match(/\d+/)[0]);
+
+        fetch(`/products/get-by-name/${encodeURIComponent(name)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const p = data.product;
+                    const row = e.target.closest('tr');
+
+                    row.querySelector('input[name*="name"]').value = p.name;
+                    row.querySelector('input[name*="item_code"]').value = p.item_code || '';
+                    const stockDiv = document.getElementById(`stock_${rowIndex}`);
+                    stockDiv.innerHTML = `متوفر: ${p.stock1 || 0}`;
+                    stockDiv.className = `stock-info ${p.stock1 > 50 ? 'stock-ok' : p.stock1 > 10 ? 'stock-low' : 'stock-danger'}`;
+                }
+            });
+    }
+});
+
+function deleteItem(btn) {
     btn.closest('tr').remove();
 }
-
-function calcTotal(i) {
-    const g1 = parseInt(document.getElementsByName(`items[${i}][grade1]`)[0]?.value || 0);
-    const g2 = parseInt(document.getElementsByName(`items[${i}][grade2]`)[0]?.value || 0);
-    const g3 = parseInt(document.getElementsByName(`items[${i}][grade3]`)[0]?.value || 0);
-    const total = g1 + g2 + g3;
-
-    const totalInput = document.getElementById(`total_${i}`);
-    if (totalInput) {
-        totalInput.value = total;
-    }
-}
 </script>
+
+<datalist id="productNamesList">
+    @foreach($products as $product)
+        <option value="{{ $product->name }}">
+    @endforeach
+</datalist>
 
 </body>
 </html>

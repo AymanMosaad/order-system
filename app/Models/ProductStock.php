@@ -16,8 +16,8 @@ class ProductStock extends Model
     ];
 
     protected $casts = [
-        'current_stock' => 'decimal:2', // مهم لعَرض الكسور
-        'min_stock'     => 'integer',
+        'current_stock' => 'decimal:2',
+        'min_stock'     => 'decimal:2',
     ];
 
     // العلاقات
@@ -29,10 +29,10 @@ class ProductStock extends Model
     // دوال مساعدة
     public function isLowStock(): bool
     {
-        return (float)$this->current_stock < (int)$this->min_stock;
+        return (float)$this->current_stock < (float)$this->min_stock;
     }
 
-    public function decreaseStock(float|int $quantity): bool
+    public function decreaseStock(float|int|string $quantity): bool
     {
         $quantity = (float) $quantity;
         if ((float)$this->current_stock >= $quantity) {
@@ -43,16 +43,21 @@ class ProductStock extends Model
         return false;
     }
 
-    public function increaseStock(float|int $quantity): bool
+    public function increaseStock(float|int|string $quantity): bool
     {
         $this->current_stock = (float)$this->current_stock + (float)$quantity;
         $this->save();
         return true;
     }
 
-    public function setStock(float|int $quantity): void
+    public function setStock(float|int|string $quantity): void
     {
         $this->current_stock = (float) $quantity;
         $this->save();
+    }
+
+    public function getCurrentStockAttribute($value)
+    {
+        return (float) $value;
     }
 }
