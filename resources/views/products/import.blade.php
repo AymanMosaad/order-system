@@ -166,16 +166,19 @@
 
     <div class="card">
         <div class="info">
-    <strong>📋 تعليمات الاستيراد:</strong>
-    <ul style="margin: 10px 0; padding-right: 18px;">
-        <li>📁 الصيغ المقبولة: <strong>xlsx / csv / xls</strong></li>
-        <li>📊 أسماء الأعمدة يجب أن تكون كما في الشيت:
-            <strong>كود الصنف، اسم الصنف، الوحدة، الرصيد</strong>
-        </li>
-        <li>🔄 سيتم تحديث الرصيد للأصناف الموجودة، وإنشاء الأصناف الجديدة تلقائياً</li>
-        <li>🔢 يفضّل أن يكون عمود <strong>كود الصنف</strong> نوعه نص (Text) داخل الإكسل للحفاظ على الأصفار في البداية</li>
-    </ul>
-</div>
+            <strong>📋 تعليمات الاستيراد:</strong>
+            <ul style="margin: 10px 0; padding-right: 18px;">
+                <li>📁 الصيغ المقبولة: <strong>xlsx / csv / xls</strong></li>
+                <li>📊 أسماء الأعمدة يجب أن تكون كما في الشيت:
+                    <strong style="color: #007bff;">كود الصنف، اسم الصنف، الوحدة، الرصيد</strong>
+                </li>
+                <li>🔄 سيتم إنشاء الأصناف الجديدة أو تحديث الرصيد للأصناف الموجودة تلقائياً</li>
+                <li>📏 <strong>المقاس</strong> يتم استخراجه تلقائياً من اسم الصنف (مثال: 20×20، 60×60)</li>
+                <li>🏷️ <strong>النوع</strong> يتم استخراجه تلقائياً من اسم الصنف (حوائط جلوريا، أرضيات جلوريا، SUPER GLOSSY، إلخ)</li>
+                <li>🔢 يفضّل أن يكون عمود <strong>كود الصنف</strong> نوعه نص (Text) داخل الإكسل للحفاظ على الأصفار في البداية</li>
+                <li>💰 عمود <strong>الرصيد</strong> يدعم الأرقام العشرية (مثال: 2483.2)</li>
+            </ul>
+        </div>
 
         {{-- فورم الرفع (POST) --}}
         <form method="POST" action="{{ route('products.import') }}" enctype="multipart/form-data">
@@ -204,36 +207,31 @@
                     <th style="padding:10px;">اسم العمود</th>
                     <th style="padding:10px;">الوصف</th>
                     <th style="padding:10px;">مثال</th>
-                </tr>
+                 </tr>
             </thead>
             <tbody>
-                <tr>
+                 <tr>
                     <td style="padding:8px;"><strong>كود الصنف</strong></td>
                     <td style="padding:8px;">معرّف الصنف (إجباري)</td>
                     <td style="padding:8px; direction:ltr;">01041200076147</td>
-                </tr>
+                 </tr>
                 <tr style="background:#f5f5f5;">
                     <td style="padding:8px;"><strong>اسم الصنف</strong></td>
                     <td style="padding:8px;">اسم توضيحي للصنف (إجباري)</td>
-                    <td style="padding:8px;">حوائط مطفي 60×60</td>
-                </tr>
-                <tr>
+                    <td style="padding:8px;">حوائط جلوريا اول 20×20 سادة البيض لامع</td>
+                 </tr>
+                 <tr>
                     <td style="padding:8px;"><strong>الوحدة</strong></td>
                     <td style="padding:8px;">نوع الوحدة (اختياري)</td>
                     <td style="padding:8px;">متر / كرتونة / قطعة</td>
-                </tr>
+                 </tr>
                 <tr style="background:#f5f5f5;">
                     <td style="padding:8px;"><strong>الرصيد</strong></td>
                     <td style="padding:8px;">الكمية الحالية (إجباري)</td>
-                    <td style="padding:8px;">288.72</td>
-                </tr>
-                <tr>
-                    <td style="padding:8px;"><strong>السعر</strong></td>
-                    <td style="padding:8px;">سعر الوحدة (اختياري)</td>
-                    <td style="padding:8px;">50.00</td>
-                </tr>
+                    <td style="padding:8px;">363.6</td>
+                 </tr>
             </tbody>
-        </table>
+         </table>
 
         <div class="alert alert-info" style="margin-top: 15px;">
             <strong>💡 ملاحظة:</strong> يمكنك تحميل القالب أولاً، ثم تعبئة البيانات فيه، ثم رفعه مرة أخرى.

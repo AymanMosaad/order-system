@@ -5,87 +5,119 @@ namespace App\Imports;
 use App\Models\Product;
 use App\Models\ProductStock;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
-use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
-use PhpOffice\PhpSpreadsheet\Cell\Cell;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use Maatwebsite\Excel\Concerns\WithStartRow;
 
-/**
- * يستورد الأصناف + الأرصدة من Excel
- * يدعم إنشاء الصنف لو مش موجود (updateOrCreate)
- */
-class ProductsImport extends DefaultValueBinder implements ToCollection, WithHeadingRow, WithCustomValueBinder
+class ProductsImport implements ToCollection, WithStartRow
 {
     public int $successCount = 0;
-    public int $errorCount = 0;
-    public array $errors = [];
+    public int $errorCount   = 0;
+    public array $errors     = [];
 
-    public function bindValue(Cell $cell, $value)
+    public function startRow(): int
     {
-        if ($cell->getColumn() === 'A') {
-            $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
-            return true;
-        }
-        return parent::bindValue($cell, $value);
+        return 2;
     }
 
     public function collection(Collection $rows)
     {
-        $excelRow = 2;
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2;
 
-        foreach ($rows as $row) {
             try {
-                $row = (array) $row;
+                // ===== الإصلاح: تحويل Collection للـ array بشكل صحيح =====
+                $rowArray = $row->values()->toArray();
 
-                // دعم عدة صيغ للأعمدة
-                $itemCode = trim((string) ($row['كود الصنف'] ?? $row[0] ?? ''));
-                $itemName = $row['اسم الصنف'] ?? $row[1] ?? 'غير محدد';
-                $unit     = $row['الوحدة'] ?? $row[2] ?? 'سيراميك';
-                $stockRaw = $row['الرصيد'] ?? $row[3] ?? 0;
+                $itemCode = trim($this->toString($rowArray[0] ?? ''));
+                $itemName = trim($this->toString($rowArray[1] ?? ''));
+                $unit     = trim($this->toString($rowArray[2] ?? ''));
+                $stock    = isset($rowArray[3]) && is_numeric($this->toString($rowArray[3]))
+                            ? (float) $this->toString($rowArray[3])
+                            : 0.0;
 
-                $stockVal = $this->toNumber($stockRaw);
-
-                if (!$itemCode) {
-                    $this->errors[] = "صف {$excelRow}: بدون كود الصنف";
-                    $this->errorCount++;
-                    $excelRow++;
+                // تخطي الصفوف الفاضية
+                if (empty($itemCode) && empty($itemName)) {
                     continue;
+                }
+
+                if (empty($itemCode)) {
+                    $this->errors[] = "صف {$rowNum}: كود الصنف مطلوب";
+                    $this->errorCount++;
+                    continue;
+                }
+
+                if (empty($itemName)) {
+                    $this->errors[] = "صف {$rowNum}: اسم الصنف مطلوب";
+                    $this->errorCount++;
+                    continue;
+                }
+
+                // تحديد النوع من عمود الوحدة أو الاسم
+                $type = !empty($unit) ? $unit : 'حوائط جلوريا';
+                if (empty($unit)) {
+                    if (mb_strpos($itemName, 'ارضيات') !== false || mb_strpos($itemName, 'أرضيات') !== false) {
+                        $type = 'أرضيات جلوريا';
+                    }
+                }
+
+                // استخراج المقاس من الاسم
+                $size = '';
+                if (preg_match('/(\d+)\s*[×xX*]\s*(\d+)/', $itemName, $matches)) {
+                    $size = $matches[1] . '×' . $matches[2];
                 }
 
                 // إنشاء أو تحديث المنتج
                 $product = Product::updateOrCreate(
                     ['item_code' => $itemCode],
                     [
-                        'name'  => $itemName,
-                        'type'  => $unit,
+                        'name'      => $itemName,
+                        'type'      => $type,
+                        'size'      => $size ?: null,
+                        'color'     => null,
+                        'price'     => 0,
                         'is_active' => true,
                     ]
                 );
 
-                // تحديث أو إنشاء الرصيد
+                // إنشاء أو تحديث الرصيد
                 ProductStock::updateOrCreate(
                     ['product_id' => $product->id],
                     [
-                        'current_stock' => $stockVal,
+                        'current_stock' => $stock,
                         'min_stock'     => 0,
                     ]
                 );
 
                 $this->successCount++;
+
             } catch (\Throwable $e) {
-                $this->errors[] = "صف {$excelRow}: خطأ — " . $e->getMessage();
+                $msg = "صف {$rowNum}: " . $e->getMessage();
+                $this->errors[] = $msg;
                 $this->errorCount++;
+                Log::error('ProductsImport error: ' . $msg);
             }
-            $excelRow++;
         }
     }
 
-    private function toNumber($v): float
+    /**
+     * تحويل أي قيمة لنص بأمان
+     */
+    private function toString($value): string
     {
-        if (is_null($v) || $v === '') return 0.0;
-        if (is_string($v)) $v = str_replace([' ', ','], ['', '.'], $v);
-        return is_numeric($v) ? (float) $v : 0.0;
+        if (is_null($value)) return '';
+
+        if (is_array($value)) {
+            $value = reset($value);
+            return $this->toString($value);
+        }
+
+        if (is_object($value)) {
+            if (method_exists($value, '__toString')) return (string) $value;
+            if (method_exists($value, 'getPlainText')) return $value->getPlainText();
+            return '';
+        }
+
+        return (string) $value;
     }
 }

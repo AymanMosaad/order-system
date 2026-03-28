@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('product_stocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->unique()->constrained('products')->cascadeOnDelete();
-            $table->integer('current_stock')->default(0); // الرصيد الحالي
-            $table->integer('min_stock')->default(50);    // الحد الأدنى للتنبيه
+            $table->decimal('current_stock', 15, 2)->default(0);
+            $table->decimal('min_stock', 15, 2)->default(50);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('product_stocks');

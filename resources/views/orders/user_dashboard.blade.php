@@ -1,96 +1,137 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم</title>
+    <title>لوحة التحكم - جلوريا للسيراميك</title>
     <style>
         * { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Tahoma', Arial, sans-serif;
             direction: rtl;
             margin: 0;
             background-color: #f5f5f5;
             padding: 20px;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h2, h3 { text-align: center; color: #333; }
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 30px 0;
-        }
-        .stat-box {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
             text-align: center;
         }
-        .stat-box h3 { margin-top: 0; color: #007bff; }
-        .stat-box p { font-size: 28px; font-weight: bold; color: #333; }
+        .header h1 { margin: 0 0 10px 0; font-size: 28px; }
+        .header p { margin: 0; opacity: 0.9; font-size: 16px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        .stat-icon { font-size: 48px; margin-bottom: 10px; }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .stat-label { color: #666; font-size: 14px; font-weight: 500; }
+
+        .box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .box-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #007bff;
+            display: inline-block;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: center; }
+        th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+            border-bottom: 2px solid #dee2e6;
+        }
+        tr:hover { background: #f5f5f5; }
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #28a745;
+            background-color: #007bff;
             color: white;
             text-decoration: none;
-            border-radius: 3px;
-            margin-bottom: 20px;
-        }
-        .btn:hover { background-color: #218838; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #333;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #f0f0f0; }
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-            margin: 2px;
+            border-radius: 8px;
+            margin: 10px 5px;
+            transition: all 0.3s;
             border: none;
             cursor: pointer;
-            text-decoration: none;
-            border-radius: 3px;
-        }
-        .btn-edit {
-            background-color: #ffc107;
-            color: #333;
-        }
-        .btn-edit:hover { background-color: #ffb300; }
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-delete:hover { background-color: #c82333; }
-        .btn-view {
-            background-color: #17a2b8;
-            color: white;
-        }
-        .btn-view:hover { background-color: #138496; }
-        .status {
-            padding: 5px 10px;
-            border-radius: 3px;
+            font-size: 14px;
             font-weight: bold;
-            font-size: 12px;
         }
-        .status-new { background-color: #d4edda; color: #155724; }
-        .status-processing { background-color: #fff3cd; color: #856404; }
-        .status-completed { background-color: #d1ecf1; color: #0c5460; }
+        .btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
+
+        .view-link {
+            color: #007bff;
+            text-decoration: none;
+            padding: 5px 10px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .view-link:hover { background: #bbdefb; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+        .empty-state .icon { font-size: 64px; margin-bottom: 15px; }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .stats-grid { grid-template-columns: 1fr; gap: 15px; }
+            table { font-size: 12px; }
+            th, td { padding: 8px; }
+            .btn { padding: 8px 15px; font-size: 12px; }
+        }
+
+        @media print {
+            .btn, .header { display: none; }
+            body { background: white; padding: 0; }
+        }
     </style>
 </head>
 <body>
@@ -98,76 +139,68 @@
 @include('layouts.navbar')
 
 <div class="container">
-    <h2>👤 لوحة التحكم - {{ auth()->user()->name }}</h2>
+    <div class="header">
+        <h1>📊 لوحة التحكم الرئيسية</h1>
+        <p>مرحباً {{ Auth::user()->name }}، هذه نظرة عامة على طلبياتك</p>
+    </div>
 
-    <div class="stats">
-        <div class="stat-box">
-            <h3>📋 الطلبيات</h3>
-            <p>{{ $totalOrders }}</p>
+    <div class="stats-grid">
+        <div class="stat-card" onclick="window.location='{{ route('orders.index') }}'">
+            <div class="stat-icon">📋</div>
+            <div class="stat-number">{{ number_format($totalOrders) }}</div>
+            <div class="stat-label">إجمالي الطلبيات</div>
         </div>
-        <div class="stat-box">
-            <h3>📦 إجمالي الكميات</h3>
-            <p>{{ $totalItems }}</p>
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-number">{{ number_format($totalItems) }}</div>
+            <div class="stat-label">إجمالي الكميات</div>
         </div>
     </div>
 
-    <a href="{{ route('orders.create') }}" class="btn">➕ طلبية جديدة</a>
-
-    <h3>📊 طلباتك</h3>
-
-    @if($orders->count() > 0)
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>ر��م الإذن</th>
-                    <th>العميل</th>
-                    <th>نوع المخزن</th>
-                    <th>التاريخ</th>
-                    <th>الأصناف</th>
-                    <th>الكمية</th>
-                    <th>الحالة</th>
-                    <th>الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($orders as $order)
-                <tr>
-                    <td>{{ $order->id }}</td>
-                    <td>{{ $order->order_number ?? '-' }}</td>
-                    <td>{{ $order->customer_name }}</td>
-                    <td>{{ $order->warehouse_type ?? '-' }}</td>
-                    <td>{{ $order->date->format('Y-m-d') }}</td>
-                    <td>{{ $order->getItemsCount() }}</td>
-                    <td>{{ $order->getTotalQuantity() }}</td>
-                    <td>
-                        <span class="status status-{{ str_replace('ة', '', str_replace('ا', '', strtolower($order->status))) }}">
-                            {{ $order->status }}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{{ route('orders.show', $order->id) }}" class="btn-sm btn-view">عرض</a>
-                        <a href="{{ route('orders.edit', $order->id) }}" class="btn-sm btn-edit">تعديل</a>
-                        <form action="{{ route('orders.destroy', $order->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-sm btn-delete" onclick="return confirm('هل أنت متأكد من الحذف؟')">حذف</button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <div style="text-align: center; margin-top: 20px;">
-            {{ $orders->links() }}
+    <div class="box">
+        <div class="box-title">🕒 آخر الطلبيات</div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الإذن</th>
+                        <th>اسم العميل</th>
+                        <th>التاريخ</th>
+                        <th>عدد الأصناف</th>
+                        <th>الإجمالي</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($orders as $order)
+                    <tr>
+                        <td><strong>{{ $order->order_number ?? '-' }}</strong></td>
+                        <td>{{ $order->customer_name }}</td>
+                        <td>{{ $order->date }}</td>
+                        <td>{{ $order->items->count() }}</td>
+                        <td>{{ number_format($order->items->sum('total')) }}</td>
+                        <td>
+                            <a href="{{ route('orders.show', $order->id) }}" class="view-link">👁️ عرض</a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="icon">📭</div>
+                                <p>لا توجد طلبيات حتى الآن</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    @else
-        <p style="text-align: center; padding: 40px; color: #666; background-color: white; border-radius: 5px;">
-            لا توجد طلبيات حالياً. <a href="{{ route('orders.create') }}">إنشاء طلبية جديدة</a>
-        </p>
-    @endif
-
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ route('orders.create') }}" class="btn btn-success">➕ إنشاء طلب جديد</a>
+            <a href="{{ route('orders.index') }}" class="btn">📋 كل طلبياتي</a>
+        </div>
+    </div>
 </div>
 
 </body>

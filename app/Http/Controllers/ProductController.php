@@ -14,12 +14,8 @@ use Throwable;
 
 class ProductController extends Controller
 {
-    /**
-     * عرض كل الأصناف (للمدير فقط)
-     */
     public function index(Request $request)
     {
-        // التحقق من أن المستخدم مدير
         if (Auth::user()->is_admin != 1) {
             return redirect()->route('orders.userDashboard')
                 ->with('error', 'غير مصرح لك بعرض الأصناف');
@@ -28,7 +24,6 @@ class ProductController extends Controller
         try {
             $query = Product::with('stock')->where('is_active', true);
 
-            // فلترة حسب البحث
             if ($request->search) {
                 $query->where(function($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search . '%')
@@ -36,42 +31,27 @@ class ProductController extends Controller
                 });
             }
 
-            // فلترة حسب النوع
             if ($request->type) {
                 $query->where('type', $request->type);
             }
 
             $products = $query->latest()->paginate(20);
 
-            // الأنواع المطلوبة يدوياً
             $requiredTypes = [
-                'حوائط جلوريا',
-                'حوائط ايكو',
-                'أرضيات جلوريا',
-                'أرضيات ايكو',
-                'HDC',
-                'UGC',
-                'بورسل',
-                'PORSLIM',
-                'SUPER GLOSSY 61×122.5',
-                'SUPER GLOSSY 61×61'
+                'حوائط جلوريا', 'حوائط ايكو', 'أرضيات جلوريا', 'أرضيات ايكو',
+                'HDC', 'UGC', 'بورسل', 'PORSLIM',
+                'SUPER GLOSSY 61×122.5', 'SUPER GLOSSY 61×61'
             ];
 
-            // جلب الأنواع الموجودة في قاعدة البيانات
             $existingTypes = Product::where('is_active', true)
-                ->distinct('type')
-                ->pluck('type')
-                ->filter()
-                ->values()
-                ->toArray();
+                ->distinct('type')->pluck('type')->filter()->values()->toArray();
 
-            // دمج الأنواع المطلوبة مع الموجودة وإزالة المكرر
             $types = collect(array_merge($requiredTypes, $existingTypes))->unique()->values();
 
             return view('products.index', [
-                'products' => $products,
-                'types' => $types,
-                'search' => $request->search,
+                'products'     => $products,
+                'types'        => $types,
+                'search'       => $request->search,
                 'selectedType' => $request->type
             ]);
         } catch (\Exception $e) {
@@ -80,27 +60,18 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * صفحة إنشاء صنف جديد (للمدير فقط)
-     */
     public function create()
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
-
         return view('products.create');
     }
 
-    /**
-     * حفظ صنف جديد (للمدير فقط)
-     */
     public function store(Request $request)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         $validated = $request->validate([
@@ -135,9 +106,7 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('products.index')
-                ->with('success', 'تم إنشاء الصنف بنجاح');
+            return redirect()->route('products.index')->with('success', 'تم إنشاء الصنف بنجاح');
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Create product error: ' . $e->getMessage());
@@ -145,14 +114,10 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * عرض تفاصيل صنف واحد (للمدير فقط)
-     */
     public function show($id)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         try {
@@ -160,19 +125,14 @@ class ProductController extends Controller
             return view('products.show', ['product' => $product]);
         } catch (\Exception $e) {
             Log::error('Error in product show: ' . $e->getMessage());
-            return redirect()->route('products.index')
-                ->with('error', 'المنتج غير موجود');
+            return redirect()->route('products.index')->with('error', 'المنتج غير موجود');
         }
     }
 
-    /**
-     * صفحة تعديل الصنف (للمدير فقط)
-     */
     public function edit($id)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         try {
@@ -180,19 +140,14 @@ class ProductController extends Controller
             return view('products.edit', ['product' => $product]);
         } catch (\Exception $e) {
             Log::error('Error in product edit: ' . $e->getMessage());
-            return redirect()->route('products.index')
-                ->with('error', 'المنتج غير موجود');
+            return redirect()->route('products.index')->with('error', 'المنتج غير موجود');
         }
     }
 
-    /**
-     * حفظ التعديلات (للمدير فقط)
-     */
     public function update(Request $request, $id)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         $product = Product::findOrFail($id);
@@ -227,9 +182,7 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('products.show', $product->id)
-                ->with('success', 'تم تحديث الصنف بنجاح');
+            return redirect()->route('products.show', $product->id)->with('success', 'تم تحديث الصنف بنجاح');
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Update product error: ' . $e->getMessage());
@@ -237,14 +190,10 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * حذف صنف (للمدير فقط)
-     */
     public function destroy($id)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         $product = Product::findOrFail($id);
@@ -255,18 +204,11 @@ class ProductController extends Controller
 
         try {
             DB::beginTransaction();
-
-            if ($product->stock) {
-                $product->stock->delete();
-            }
-
+            if ($product->stock) $product->stock->delete();
             $product->delete();
-
             DB::commit();
 
-            return redirect()
-                ->route('products.index')
-                ->with('success', 'تم حذف الصنف بنجاح');
+            return redirect()->route('products.index')->with('success', 'تم حذف الصنف بنجاح');
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Delete product error: ' . $e->getMessage());
@@ -274,9 +216,6 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * AJAX: جلب الصنف كامل (متاح للمستخدمين المسجلين)
-     */
     public function getByName($name)
     {
         $product = Product::with('stock')
@@ -300,13 +239,12 @@ class ProductController extends Controller
     }
 
     /**
-     * استيراد الأصناف من Excel/CSV (للمدير فقط)
+     * ===== التعديل هنا: بيرجع لصفحة الاستيراد مع عرض الأخطاء =====
      */
     public function import(Request $request)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         $request->validate([
@@ -328,38 +266,43 @@ class ProductController extends Controller
                 $message .= "، {$summary['failed']} صنف فشل استيرادهم";
             }
 
+            // ===== رجوع لصفحة الاستيراد نفسها عشان نشوف الأخطاء =====
             return redirect()
-                ->route('products.index')
+                ->route('products.importPage')
                 ->with('success', $message)
-                ->with('import_errors', $import->errors);
+                ->with('import_errors', $import->errors)
+                ->with('import_summary', $summary);
+
         } catch (Throwable $e) {
             Log::error('Import error: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'خطأ في الاستيراد: ' . $e->getMessage()]);
+            return redirect()
+                ->route('products.importPage')
+                ->withErrors(['error' => 'خطأ في الاستيراد: ' . $e->getMessage()]);
         }
     }
 
-    /**
-     * تحميل قالب Excel مع البيانات الموجودة (للمدير فقط)
-     */
+    public function importPage()
+    {
+        if (Auth::user()->is_admin != 1) {
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
+        }
+        return view('products.import');
+    }
+
     public function downloadTemplate()
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         try {
-            // جلب جميع المنتجات النشطة
-            $products = Product::where('is_active', true)
-                ->with('stock')
-                ->get();
+            $products = Product::where('is_active', true)->with('stock')->get();
 
-            // إنشاء ملف CSV مع البيانات الموجودة
-            $headers = ['كود الصنف', 'اسم الصنف', 'الوحدة', 'الرصيد'];
+            $headers  = ['كود الصنف', 'اسم الصنف', 'الوحدة', 'الرصيد'];
             $filename = 'products_' . date('Y-m-d_H-i-s') . '.csv';
 
             $stream = fopen('php://temp', 'w+');
-            fwrite($stream, "\xEF\xBB\xBF"); // BOM للعربية
+            fwrite($stream, "\xEF\xBB\xBF");
             fputcsv($stream, $headers);
 
             if ($products->count() > 0) {
@@ -372,10 +315,8 @@ class ProductController extends Controller
                     ]);
                 }
             } else {
-                // إذا كان الجدول فاضي، أضف صفوف مثال
                 fputcsv($stream, ['01041200076147', 'بلاط حوائط 60×60 لامع', 'سيراميك', '1000']);
                 fputcsv($stream, ['01041200076148', 'بورسلان أرضيات 80×80', 'بورسلان', '500']);
-                fputcsv($stream, ['01041200076149', 'رخام صناعي 60×120', 'رخام', '250']);
             }
 
             rewind($stream);
@@ -387,34 +328,16 @@ class ProductController extends Controller
                 'Content-Disposition' => "attachment; filename={$filename}",
                 'Cache-Control'       => 'no-store, no-cache, must-revalidate',
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error downloading template: ' . $e->getMessage());
             return back()->with('error', 'حدث خطأ في تحميل القالب: ' . $e->getMessage());
         }
     }
 
-    /**
-     * صفحة استيراد المنتجات (للمدير فقط)
-     */
-    public function importPage()
-    {
-        if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
-        }
-
-        return view('products.import');
-    }
-
-    /**
-     * تقرير الأصناف والأرصدة (للمدير فقط)
-     */
     public function report()
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
         $products = Product::with('stock', 'orderItems')
@@ -444,25 +367,19 @@ class ProductController extends Controller
         ]);
     }
 
-    /**
-     * تقرير الرصيد حسب النوع والمقاس
-     */
     public function stockReport(Request $request)
     {
         if (Auth::user()->is_admin != 1) {
-            return redirect()->route('orders.userDashboard')
-                ->with('error', 'غير مصرح لك بالدخول');
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك بالدخول');
         }
 
         try {
             $query = Product::with('stock')->where('is_active', true);
 
-            // فلترة حسب النوع - تأكد من أنها تعمل
             if ($request->type && $request->type != '') {
                 $query->where('type', $request->type);
             }
 
-            // فلترة حسب المقاس
             if ($request->size && $request->size != '') {
                 $size = $request->size;
                 $query->where(function($q) use ($size) {
@@ -474,7 +391,6 @@ class ProductController extends Controller
                 });
             }
 
-            // فلترة حسب البحث
             if ($request->search && $request->search != '') {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
@@ -487,50 +403,71 @@ class ProductController extends Controller
 
             $products = $query->get();
 
-            // الأنواع المطلوبة يدوياً للفلترة
             $requiredTypes = [
-                'حوائط جلوريا',
-                'حوائط ايكو',
-                'أرضيات جلوريا',
-                'أرضيات ايكو',
-                'HDC',
-                'UGC',
-                'بورسل',
-                'PORSLIM',
-                'SUPER GLOSSY 61×122.5',
-                'SUPER GLOSSY 61×61'
+                'حوائط جلوريا', 'حوائط ايكو', 'أرضيات جلوريا', 'أرضيات ايكو',
+                'HDC', 'UGC', 'بورسل', 'PORSLIM',
+                'SUPER GLOSSY 61×122.5', 'SUPER GLOSSY 61×61'
             ];
 
-            // جلب الأنواع الموجودة في قاعدة البيانات
             $existingTypes = Product::where('is_active', true)
-                ->distinct('type')
-                ->pluck('type')
-                ->filter()
-                ->values()
-                ->toArray();
+                ->distinct('type')->pluck('type')->filter()->values()->toArray();
 
-            // دمج الأنواع المطلوبة مع الموجودة وإزالة المكرر
             $types = collect(array_merge($requiredTypes, $existingTypes))->unique()->values();
 
-            // جلب المقاسات الموجودة في قاعدة البيانات
             $sizes = Product::where('is_active', true)
-                ->whereNotNull('size')
-                ->where('size', '!=', '')
-                ->distinct('size')
-                ->pluck('size')
-                ->filter()
-                ->sort()
-                ->values();
+                ->whereNotNull('size')->where('size', '!=', '')
+                ->distinct('size')->pluck('size')->filter()->sort()->values();
 
             return view('products.stock_report', [
                 'products' => $products,
-                'types' => $types,
-                'sizes' => $sizes,
-                'filters' => $request->all()
+                'types'    => $types,
+                'sizes'    => $sizes,
+                'filters'  => $request->all()
             ]);
         } catch (\Exception $e) {
             Log::error('Error in stockReport: ' . $e->getMessage());
             return back()->with('error', 'حدث خطأ في تحميل التقرير: ' . $e->getMessage());
+        }
+    }
+
+    public function adjustStock(Request $request, $id)
+    {
+        if (Auth::user()->is_admin != 1) {
+            return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
+        }
+
+        $product = Product::with('stock')->findOrFail($id);
+
+        $validated = $request->validate([
+            'adjustment_type' => 'required|in:add,subtract,set',
+            'quantity'        => 'required|numeric|min:0',
+            'notes'           => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $quantity = (float) $validated['quantity'];
+
+            switch ($validated['adjustment_type']) {
+                case 'add':
+                    $product->increaseStock($quantity);
+                    $msg = "تم إضافة {$quantity} للرصيد";
+                    break;
+                case 'subtract':
+                    if (!$product->decreaseStock($quantity)) {
+                        return back()->withErrors(['error' => 'الرصيد غير كافي']);
+                    }
+                    $msg = "تم خصم {$quantity} من الرصيد";
+                    break;
+                case 'set':
+                    $product->setStockOnRelation($quantity);
+                    $msg = "تم تعيين الرصيد على {$quantity}";
+                    break;
+            }
+
+            return redirect()->route('products.show', $product->id)->with('success', $msg);
+        } catch (Throwable $e) {
+            Log::error('adjustStock error: ' . $e->getMessage());
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 }

@@ -15,7 +15,6 @@
         }
         .container { max-width: 1600px; margin: 0 auto; }
 
-        /* هيدر التقرير */
         .report-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -24,100 +23,76 @@
             margin-bottom: 30px;
             text-align: center;
         }
+        .report-header h1 { margin: 0 0 10px 0; font-size: 28px; }
+        .report-header p  { margin: 0; opacity: 0.9; }
 
-        .report-header h1 {
-            margin: 0 0 10px 0;
-            font-size: 28px;
-        }
-
-        .report-header p {
-            margin: 0;
-            opacity: 0.9;
-        }
-
-        /* فلاتر البحث */
         .filters {
             background: white;
-            padding: 20px;
+            padding: 20px 25px;
             border-radius: 15px;
             margin-bottom: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
-        .filter-group {
-            display: inline-block;
-            margin: 0 10px;
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
         }
-
-        .filter-group label {
-            font-weight: bold;
-            color: #555;
-            margin-left: 10px;
-        }
-
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-group label { font-weight: bold; color: #555; font-size: 13px; }
         .filter-group input, .filter-group select {
-            padding: 8px 12px;
+            padding: 9px 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
+            font-family: 'Tahoma', Arial, sans-serif;
+            min-width: 155px;
         }
-
         .btn-filter {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+            background: #007bff; color: white;
+            border: none; padding: 9px 22px;
+            border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: bold;
+            transition: all 0.3s; white-space: nowrap;
         }
+        .btn-filter:hover { background: #0056b3; transform: translateY(-1px); }
+        .btn-reset {
+            background: #6c757d; color: white;
+            border: none; padding: 9px 22px;
+            border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: bold;
+            text-decoration: none; display: inline-block;
+            transition: all 0.3s; white-space: nowrap;
+        }
+        .btn-reset:hover { background: #545b62; }
 
-        /* كروت الإحصائيات */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-
         .stat-card {
             background: white;
-            padding: 20px;
+            padding: 25px 20px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
             transition: transform 0.3s;
         }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon  { font-size: 40px; margin-bottom: 10px; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #007bff; margin: 10px 0; }
+        .stat-label { color: #666; font-size: 14px; }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #007bff;
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* الجداول */
         .section-card {
             background: white;
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
         .section-title {
             font-size: 20px;
             font-weight: bold;
@@ -128,59 +103,86 @@
             display: inline-block;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            border: 1px solid #eee;
-            padding: 12px;
-            text-align: center;
-        }
-
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: center; font-size: 14px; }
         th {
             background: #f8f9fa;
             color: #333;
             font-weight: bold;
             border-bottom: 2px solid #dee2e6;
         }
-
-        tr:hover {
-            background: #f5f5f5;
-        }
+        tr:hover { background: #f5f5f5; }
 
         .badge {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
         }
-
         .badge-success { background: #d4edda; color: #155724; }
         .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-danger  { background: #f8d7da; color: #721c24; }
+        .badge-info    { background: #d1ecf1; color: #0c5460; }
 
-        .total-row {
+        .total-row { background: #e9ecef !important; font-weight: bold; }
+
+        .progress-bar-wrap {
             background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 22px;
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #007bff, #667eea);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
             font-weight: bold;
+            min-width: 30px;
+            border-radius: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .search-bar input {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Tahoma', Arial, sans-serif;
+            width: 260px;
         }
 
         .btn-print {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 20px;
+            background: #17a2b8; color: white;
+            border: none; padding: 10px 22px;
+            border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: bold;
+            margin-bottom: 20px; transition: all 0.3s;
+        }
+        .btn-print:hover { background: #138496; transform: translateY(-1px); }
+
+        @media (max-width: 768px) {
+            .filter-row { flex-direction: column; }
+            .filter-group input, .filter-group select { min-width: 100%; }
+            .search-bar input { width: 100%; }
+            th, td { padding: 8px; font-size: 12px; }
         }
 
         @media print {
-            .filters, .btn-print, .navbar { display: none; }
+            .filters, .btn-print, .search-bar button { display: none; }
             body { background: white; padding: 0; }
             .stat-card { break-inside: avoid; }
         }
@@ -200,24 +202,26 @@
 
     <div class="filters">
         <form method="GET" action="{{ route('orders.advancedReport') }}">
-            <div class="filter-group">
-                <label>من تاريخ:</label>
-                <input type="date" name="from_date" value="{{ $fromDate ?? '' }}">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>من تاريخ:</label>
+                    <input type="date" name="from_date" value="{{ $fromDate ?? '' }}">
+                </div>
+                <div class="filter-group">
+                    <label>إلى تاريخ:</label>
+                    <input type="date" name="to_date" value="{{ $toDate ?? '' }}">
+                </div>
+                <div class="filter-group">
+                    <label>نوع المخزن:</label>
+                    <select name="warehouse_type">
+                        <option value="">الكل</option>
+                        <option value="محلي"     {{ request('warehouse_type') == 'محلي'     ? 'selected' : '' }}>محلي</option>
+                        <option value="معرض بيع" {{ request('warehouse_type') == 'معرض بيع' ? 'selected' : '' }}>معرض بيع</option>
+                        <option value="تصدير"    {{ request('warehouse_type') == 'تصدير'    ? 'selected' : '' }}>تصدير</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-filter">🔍 بحث</button>
             </div>
-            <div class="filter-group">
-                <label>إلى تاريخ:</label>
-                <input type="date" name="to_date" value="{{ $toDate ?? '' }}">
-            </div>
-            <div class="filter-group">
-                <label>نوع المخزن:</label>
-                <select name="warehouse_type">
-                    <option value="">الكل</option>
-                    <option value="محلي">محلي</option>
-                    <option value="معرض بيع">معرض بيع</option>
-                    <option value="تصدير">تصدير</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-filter">🔍 بحث</button>
         </form>
     </div>
 
@@ -242,84 +246,93 @@
     <!-- تقرير حسب نوع الصنف -->
     <div class="section-card">
         <div class="section-title">🏷️ التقرير حسب نوع الصنف</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>نوع الصنف</th>
-                    <th>عدد الطلبيات</th>
-                    <th>إجمالي الكمية</th>
-                    <th>النسبة</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($typeStats as $type => $data)
-                <tr>
-                    <td><strong>{{ $type }}</strong></td>
-                    <td>{{ $data['orders_count'] }}</td>
-                    <td>{{ number_format($data['total_quantity']) }}</td>
-                    <td>
-                        @php
-                            $percentage = $totalQuantity > 0 ? ($data['total_quantity'] / $totalQuantity) * 100 : 0;
-                        @endphp
-                        <div style="background: #e9ecef; border-radius: 10px; overflow: hidden;">
-                            <div style="background: #007bff; width: {{ $percentage }}%; padding: 4px; color: white; font-size: 10px;">{{ round($percentage, 1) }}%</div>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>نوع الصنف</th>
+                        <th>عدد الطلبيات</th>
+                        <th>إجمالي الكمية</th>
+                        <th>النسبة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($typeStats as $type => $data)
+                    <tr>
+                        <td><strong>{{ $type }}</strong></td>
+                        <td>{{ $data['orders_count'] }}</td>
+                        <td>{{ number_format($data['total_quantity']) }}</td>
+                        <td style="min-width: 120px;">
+                            @php
+                                $percentage = $totalQuantity > 0
+                                    ? ($data['total_quantity'] / $totalQuantity) * 100
+                                    : 0;
+                            @endphp
+                            <div class="progress-bar-wrap">
+                                <div class="progress-bar-fill" style="width: {{ max($percentage, 5) }}%;">
+                                    {{ round($percentage, 1) }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- تقرير حسب مندوب المبيعات -->
     <div class="section-card">
         <div class="section-title">👤 تقرير حسب مندوب المبيعات</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>اسم المندوب</th>
-                    <th>عدد الطلبيات</th>
-                    <th>إجمالي القطع</th>
-                    <th>متوسط الطلبية</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($userStats as $user)
-                <tr>
-                    <td><strong>{{ $user['name'] }}</strong></td>
-                    <td>{{ $user['orders_count'] }}</td>
-                    <td>{{ number_format($user['total_quantity']) }}</td>
-                    <td>{{ number_format($user['orders_count'] > 0 ? $user['total_quantity'] / $user['orders_count'] : 0) }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td>الإجمالي الكلي</td>
-                    <td>{{ $totalOrders }}</td>
-                    <td>{{ number_format($totalQuantity) }}</td>
-                    <td>{{ number_format($totalOrders > 0 ? $totalQuantity / $totalOrders : 0) }}</td>
-                </tr>
-            </tfoot>
-        </table>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المندوب</th>
+                        <th>عدد الطلبيات</th>
+                        <th>إجمالي القطع</th>
+                        <th>متوسط الطلبية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($userStats as $user)
+                    <tr>
+                        <td><strong>{{ $user['name'] }}</strong></td>
+                        <td>{{ $user['orders_count'] }}</td>
+                        <td>{{ number_format($user['total_quantity']) }}</td>
+                        <td>{{ number_format($user['orders_count'] > 0 ? $user['total_quantity'] / $user['orders_count'] : 0) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td>الإجمالي الكلي</td>
+                        <td>{{ $totalOrders }}</td>
+                        <td>{{ number_format($totalQuantity) }}</td>
+                        <td>{{ number_format($totalOrders > 0 ? $totalQuantity / $totalOrders : 0) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
 
     <!-- تقرير تفصيلي بالأصناف مع فلترة وبحث -->
     <div class="section-card">
         <div class="section-title">📋 التقرير التفصيلي للأصناف</div>
 
-        <!-- إضافة فلترة وبحث للتقرير التفصيلي -->
-        <div style="margin-bottom: 20px;">
-            <form method="GET" action="{{ route('orders.advancedReport') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <input type="hidden" name="from_date" value="{{ $fromDate ?? '' }}">
-                <input type="hidden" name="to_date" value="{{ $toDate ?? '' }}">
-                <input type="hidden" name="warehouse_type" value="{{ request('warehouse_type') }}">
-                <div class="filter-group" style="margin: 0;">
-                    <input type="text" name="product_search" placeholder="🔍 بحث بكود أو اسم الصنف" value="{{ request('product_search') }}" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; width: 250px;">
-                </div>
+        <div class="search-bar">
+            <form method="GET" action="{{ route('orders.advancedReport') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%;">
+                <input type="hidden" name="from_date"       value="{{ $fromDate ?? '' }}">
+                <input type="hidden" name="to_date"         value="{{ $toDate ?? '' }}">
+                <input type="hidden" name="warehouse_type"  value="{{ request('warehouse_type') }}">
+                <input type="text"
+                       name="product_search"
+                       placeholder="🔍 بحث بكود أو اسم الصنف"
+                       value="{{ request('product_search') }}">
                 <button type="submit" class="btn-filter">🔍 بحث في الأصناف</button>
                 @if(request('product_search'))
-                    <a href="{{ route('orders.advancedReport', array_filter(['from_date' => $fromDate, 'to_date' => $toDate, 'warehouse_type' => request('warehouse_type')])) }}" class="btn-reset" style="background: #6c757d; color: white; padding: 8px 20px; border-radius: 8px; text-decoration: none;">🗑️ إلغاء</a>
+                    <a href="{{ route('orders.advancedReport', array_filter(['from_date' => $fromDate, 'to_date' => $toDate, 'warehouse_type' => request('warehouse_type')])) }}"
+                       class="btn-reset">🗑️ إلغاء</a>
                 @endif
             </form>
         </div>
@@ -342,7 +355,8 @@
                         if(request('product_search')) {
                             $search = request('product_search');
                             $filteredProducts = array_filter($productStats, function($product) use ($search) {
-                                return stripos($product['item_code'], $search) !== false || stripos($product['name'], $search) !== false;
+                                return stripos($product['item_code'], $search) !== false
+                                    || stripos($product['name'], $search) !== false;
                             });
                         }
                     @endphp
@@ -371,7 +385,9 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="text-align: center;">لا توجد نتائج تطابق معايير البحث</td>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #999;">
+                            لا توجد نتائج تطابق معايير البحث
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>
