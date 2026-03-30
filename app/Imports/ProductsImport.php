@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 
@@ -15,6 +16,8 @@ class ProductsImport implements ToCollection, WithStartRow
     public int $errorCount   = 0;
     public array $errors     = [];
 
+    private static $cleared = false;
+
     public function startRow(): int
     {
         return 2;
@@ -22,11 +25,24 @@ class ProductsImport implements ToCollection, WithStartRow
 
     public function collection(Collection $rows)
     {
+        // مسح البيانات القديمة تلقائياً (مرة واحدة فقط)
+        if (!self::$cleared) {
+            try {
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                ProductStock::query()->delete();
+                Product::query()->delete();
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                self::$cleared = true;
+                Log::info('تم مسح البيانات القديمة بنجاح');
+            } catch (\Exception $e) {
+                Log::error('فشل مسح البيانات القديمة: ' . $e->getMessage());
+            }
+        }
+
         foreach ($rows as $index => $row) {
             $rowNum = $index + 2;
 
             try {
-                // ===== الإصلاح: تحويل Collection للـ array بشكل صحيح =====
                 $rowArray = $row->values()->toArray();
 
                 $itemCode = trim($this->toString($rowArray[0] ?? ''));
@@ -36,7 +52,6 @@ class ProductsImport implements ToCollection, WithStartRow
                             ? (float) $this->toString($rowArray[3])
                             : 0.0;
 
-                // تخطي الصفوف الفاضية
                 if (empty($itemCode) && empty($itemName)) {
                     continue;
                 }
@@ -53,7 +68,6 @@ class ProductsImport implements ToCollection, WithStartRow
                     continue;
                 }
 
-                // تحديد النوع من عمود الوحدة أو الاسم
                 $type = !empty($unit) ? $unit : 'حوائط جلوريا';
                 if (empty($unit)) {
                     if (mb_strpos($itemName, 'ارضيات') !== false || mb_strpos($itemName, 'أرضيات') !== false) {
@@ -61,13 +75,11 @@ class ProductsImport implements ToCollection, WithStartRow
                     }
                 }
 
-                // استخراج المقاس من الاسم
                 $size = '';
                 if (preg_match('/(\d+)\s*[×xX*]\s*(\d+)/', $itemName, $matches)) {
                     $size = $matches[1] . '×' . $matches[2];
                 }
 
-                // إنشاء أو تحديث المنتج
                 $product = Product::updateOrCreate(
                     ['item_code' => $itemCode],
                     [
@@ -80,7 +92,6 @@ class ProductsImport implements ToCollection, WithStartRow
                     ]
                 );
 
-                // إنشاء أو تحديث الرصيد
                 ProductStock::updateOrCreate(
                     ['product_id' => $product->id],
                     [
@@ -100,9 +111,6 @@ class ProductsImport implements ToCollection, WithStartRow
         }
     }
 
-    /**
-     * تحويل أي قيمة لنص بأمان
-     */
     private function toString($value): string
     {
         if (is_null($value)) return '';
