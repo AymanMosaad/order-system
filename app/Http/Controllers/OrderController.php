@@ -30,12 +30,10 @@ class OrderController extends Controller
         try {
             $query = Order::with('items.product');
 
-            // فلترة حسب نوع المخزن
             if ($request->warehouse_type) {
                 $query->where('warehouse_type', $request->warehouse_type);
             }
 
-            // فلترة حسب التاريخ
             if ($request->from_date) {
                 $query->whereDate('date', '>=', $request->from_date);
             }
@@ -45,21 +43,12 @@ class OrderController extends Controller
 
             $orders = $query->get();
 
-            // الأنواع المطلوبة
             $productTypes = [
-                'حوائط جلوريا',
-                'حوائط ايكو',
-                'أرضيات جلوريا',
-                'أرضيات ايكو',
-                'HDC',
-                'UGC',
-                'بورسل',
-                'PORSLIM',
-                'SUPER GLOSSY 61×122.5',
-                'SUPER GLOSSY 61×61'
+                'حوائط جلوريا', 'حوائط ايكو', 'أرضيات جلوريا', 'أرضيات ايكو',
+                'HDC', 'UGC', 'بورسل', 'PORSLIM',
+                'SUPER GLOSSY 61×122.5', 'SUPER GLOSSY 61×61'
             ];
 
-            // إحصائيات حسب نوع الصنف
             $typeSales = [];
             foreach ($productTypes as $type) {
                 $typeSales[$type] = 0;
@@ -79,7 +68,6 @@ class OrderController extends Controller
                 }
             }
 
-            // إحصائيات حسب نوع المخزن
             $warehouseTypes = ['محلي', 'تصدير', 'معرض بيع', 'احتكار'];
             $warehouseStats = [];
             foreach ($warehouseTypes as $warehouse) {
@@ -90,7 +78,6 @@ class OrderController extends Controller
                 ];
             }
 
-            // إجمالي عام
             $totalOrders = $orders->count();
             $totalQuantity = $orders->sum(fn($o) => $o->getTotalQuantity());
 
@@ -115,11 +102,11 @@ class OrderController extends Controller
     }
 
     /**
-     * عرض كل الطلبيات (للمدير فقط)
+     * عرض كل الطلبيات (للمدير العام ومدير المبيعات)
      */
     public function index()
     {
-        if (Auth::user()->is_admin != 1) {
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')
                 ->with('error', 'غير مصرح لك بعرض كل الطلبيات');
         }
@@ -141,7 +128,7 @@ class OrderController extends Controller
         try {
             $order = Order::with('items.product', 'user')->findOrFail($id);
 
-            if (Auth::user()->is_admin != 1 && Auth::id() !== $order->user_id) {
+            if (Auth::user()->role == 'sales_rep' && Auth::id() !== $order->user_id) {
                 abort(403, 'غير مصرح لك بعرض هذه الطلبية');
             }
 
@@ -157,9 +144,6 @@ class OrderController extends Controller
     // الطلبيات الخاصة بالمستخدم
     // ===========================
 
-    /**
-     * لوحة تحكم المستخدم
-     */
     public function userDashboard()
     {
         try {
@@ -179,9 +163,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * صفحة إنشاء طلبية جديدة
-     */
     public function create()
     {
         try {
@@ -196,9 +177,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * حفظ طلبية جديدة
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -272,9 +250,9 @@ class OrderController extends Controller
 
             DB::commit();
 
-            if (Auth::user()->is_admin != 1) {
+            if (Auth::user()->role == 'sales_rep') {
                 try {
-                    $admins = \App\Models\User::where('is_admin', 1)->get();
+                    $admins = \App\Models\User::whereIn('role', ['super_admin', 'sales_manager'])->get();
                     foreach ($admins as $admin) {
                         try {
                             $admin->notify(new \App\Notifications\NewOrderNotification($order));
@@ -300,15 +278,12 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * صفحة تعديل طلبية
-     */
     public function edit($id)
     {
         try {
             $order = Order::with('items.product')->findOrFail($id);
 
-            if (Auth::user()->is_admin != 1 && Auth::id() !== $order->user_id) {
+            if (Auth::user()->role == 'sales_rep' && Auth::id() !== $order->user_id) {
                 abort(403, 'غير مصرح لك بتعديل هذه الطلبية');
             }
 
@@ -325,15 +300,12 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * حفظ التعديلات
-     */
     public function update(Request $request, $id)
     {
         try {
             $order = Order::findOrFail($id);
 
-            if (Auth::user()->is_admin != 1 && Auth::id() !== $order->user_id) {
+            if (Auth::user()->role == 'sales_rep' && Auth::id() !== $order->user_id) {
                 abort(403, 'غير مصرح لك بتعديل هذه الطلبية');
             }
 
@@ -405,15 +377,12 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * حذف طلبية
-     */
     public function destroy($id)
     {
         try {
             $order = Order::findOrFail($id);
 
-            if (Auth::user()->is_admin != 1 && Auth::id() !== $order->user_id) {
+            if (Auth::user()->role == 'sales_rep' && Auth::id() !== $order->user_id) {
                 if (request()->expectsJson()) {
                     return response()->json([
                         'error' => 'غير مصرح لك بحذف هذه الطلبية'
@@ -466,12 +435,9 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * لوحة تحكم المدير
-     */
     public function adminDashboard()
     {
-        if (Auth::user()->is_admin != 1) {
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')
                 ->with('error', 'غير مصرح لك بالدخول');
         }
@@ -499,12 +465,9 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * عرض التقرير المتقدم (للمدير فقط)
-     */
     public function advancedReport(Request $request)
     {
-        if (Auth::user()->is_admin != 1) {
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')
                 ->with('error', 'غير مصرح لك بالدخول');
         }
@@ -524,11 +487,9 @@ class OrderController extends Controller
 
             $orders = $query->get();
 
-            // إحصائيات عامة
             $totalOrders = $orders->count();
             $totalQuantity = $orders->sum(fn($o) => $o->getTotalQuantity());
 
-            // إحصائيات حسب المستخدم
             $userStats = [];
             foreach ($orders->groupBy('user_id') as $userId => $userOrders) {
                 $user = $userOrders->first()->user;
@@ -541,7 +502,6 @@ class OrderController extends Controller
                 }
             }
 
-            // إحصائيات حسب نوع الصنف
             $typeStats = [];
             foreach ($orders as $order) {
                 foreach ($order->items as $item) {
@@ -559,7 +519,6 @@ class OrderController extends Controller
                 }
             }
 
-            // إحصائيات المنتجات
             $productStats = [];
             $products = Product::with('stock', 'orderItems')->where('is_active', true)->get();
             foreach ($products as $product) {
@@ -592,5 +551,102 @@ class OrderController extends Controller
             Log::error('Error in advancedReport: ' . $e->getMessage());
             return back()->with('error', 'حدث خطأ في تحميل التقرير: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * عرض طلبيات المصنع (الطلبيات المرسلة للمصنع فقط)
+     */
+    public function factoryOrders()
+    {
+        if (Auth::user()->role != 'factory' && Auth::user()->role != 'super_admin') {
+            return redirect()->route('orders.userDashboard')
+                ->with('error', 'غير مصرح لك بالدخول - هذه الصفحة مخصصة للمصنع فقط');
+        }
+
+        try {
+            $orders = Order::with('user', 'items')
+                ->where('sent_to_factory', 1)
+                ->latest()
+                ->paginate(20);
+
+            return view('factory.orders', ['orders' => $orders]);
+        } catch (\Exception $e) {
+            Log::error('Error in factoryOrders: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في تحميل طلبيات المصنع');
+        }
+    }
+
+    /**
+     * تحديث حالة الطلبية (للمصنع) + إرسال إشعار للمديرين
+     */
+    public function updateOrderStatus(Request $request, $id)
+    {
+        if (Auth::user()->role != 'factory' && Auth::user()->role != 'super_admin') {
+            return back()->with('error', 'غير مصرح لك بهذه العملية');
+        }
+
+        $order = Order::findOrFail($id);
+        $oldStatus = $order->status;
+
+        $validated = $request->validate([
+            'status' => 'required|in:جديدة,تحت التحميل,تم التحميل,مؤجلة,ملغية',
+            'factory_notes' => 'nullable|string|max:500'
+        ]);
+
+        $order->status = $validated['status'];
+        $order->factory_notes = $validated['factory_notes'] ?? null;
+        $order->save();
+
+        // تسجيل التاريخ
+        if (class_exists(\App\Models\OrderStatusHistory::class)) {
+            try {
+                \App\Models\OrderStatusHistory::create([
+                    'order_id' => $order->id,
+                    'status' => $validated['status'],
+                    'notes' => $validated['factory_notes'] ?? null,
+                    'user_id' => Auth::id(),
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Could not save status history: ' . $e->getMessage());
+            }
+        }
+
+        // إرسال إشعار للمديرين عند تغيير الحالة
+        if ($oldStatus != $validated['status']) {
+            try {
+                $admins = \App\Models\User::whereIn('role', ['super_admin', 'sales_manager'])->get();
+                foreach ($admins as $admin) {
+                    try {
+                        $admin->notify(new \App\Notifications\OrderStatusChangedNotification($order, $oldStatus));
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to send notification to admin: ' . $e->getMessage());
+                    }
+                }
+                Log::info('📧 تم إرسال إشعار للمديرين عن تغيير حالة الطلبية رقم ' . $order->id . ' إلى ' . $validated['status']);
+            } catch (\Exception $e) {
+                Log::warning('Notification system error: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', 'تم تحديث حالة الطلبية بنجاح');
+    }
+
+    /**
+     * إرسال الطلبية للمصنع (للمدير العام ومدير المبيعات)
+     */
+    public function sendToFactory($id)
+    {
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
+            return back()->with('error', 'غير مصرح لك بهذه العملية');
+        }
+
+        $order = Order::findOrFail($id);
+
+        $order->sent_to_factory = 1;
+        $order->sent_to_factory_at = now();
+        $order->status = 'مرسلة للمصنع';
+        $order->save();
+
+        return back()->with('success', 'تم إرسال الطلبية للمصنع بنجاح');
     }
 }

@@ -22,11 +22,17 @@ class Order extends Model
         'driver_name',
         'date',
         'status',
-        'reference_number'
+        'reference_number',
+        'sent_to_factory',
+        'sent_to_factory_at',
+        'factory_notes',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'sent_to_factory_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // ===== العلاقات =====

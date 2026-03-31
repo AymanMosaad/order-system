@@ -20,7 +20,12 @@ class AuthenticatedSessionController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect('/orders/user-dashboard');
+
+            // التعديل: التوجيه حسب الدور
+            if (in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('orders.userDashboard');
         }
 
         return back()->withErrors([

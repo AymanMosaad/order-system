@@ -2,16 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>تقرير متقدم - جلوريا للسيراميك</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { box-sizing: border-box; }
         body {
-            font-family: 'Tahoma', Arial, sans-serif;
+            font-family: 'Segoe UI', 'Tahoma', Arial, sans-serif;
             direction: rtl;
-            margin: 0;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             padding: 20px;
+            padding-top: 90px;
         }
         .container { max-width: 1600px; margin: 0 auto; }
 
@@ -41,12 +43,12 @@
         }
         .filter-group { display: flex; flex-direction: column; gap: 6px; }
         .filter-group label { font-weight: bold; color: #555; font-size: 13px; }
+        .filter-group label i { margin-left: 5px; }
         .filter-group input, .filter-group select {
             padding: 9px 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
-            font-family: 'Tahoma', Arial, sans-serif;
             min-width: 155px;
         }
         .btn-filter {
@@ -54,7 +56,7 @@
             border: none; padding: 9px 22px;
             border-radius: 8px; cursor: pointer;
             font-size: 14px; font-weight: bold;
-            transition: all 0.3s; white-space: nowrap;
+            transition: all 0.3s;
         }
         .btn-filter:hover { background: #0056b3; transform: translateY(-1px); }
         .btn-reset {
@@ -62,14 +64,14 @@
             border: none; padding: 9px 22px;
             border-radius: 8px; cursor: pointer;
             font-size: 14px; font-weight: bold;
-            text-decoration: none; display: inline-block;
-            transition: all 0.3s; white-space: nowrap;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-reset:hover { background: #545b62; }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -102,9 +104,20 @@
             border-bottom: 3px solid #007bff;
             display: inline-block;
         }
+        .section-title i { margin-left: 8px; color: #007bff; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: center; font-size: 14px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            min-width: 600px;
+        }
+        th, td {
+            border: 1px solid #eee;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
         th {
             background: #f8f9fa;
             color: #333;
@@ -161,7 +174,6 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
-            font-family: 'Tahoma', Arial, sans-serif;
             width: 260px;
         }
 
@@ -170,19 +182,22 @@
             border: none; padding: 10px 22px;
             border-radius: 8px; cursor: pointer;
             font-size: 14px; font-weight: bold;
-            margin-bottom: 20px; transition: all 0.3s;
+            margin-bottom: 20px;
         }
         .btn-print:hover { background: #138496; transform: translateY(-1px); }
 
         @media (max-width: 768px) {
+            body { padding: 10px; padding-top: 80px; }
             .filter-row { flex-direction: column; }
-            .filter-group input, .filter-group select { min-width: 100%; }
+            .filter-group input, .filter-group select { width: 100%; }
             .search-bar input { width: 100%; }
             th, td { padding: 8px; font-size: 12px; }
+            .report-header h1 { font-size: 22px; }
+            .stat-value { font-size: 24px; }
         }
 
         @media print {
-            .filters, .btn-print, .search-bar button { display: none; }
+            .filters, .btn-print, .search-bar, .navbar-custom { display: none; }
             body { background: white; padding: 0; }
             .stat-card { break-inside: avoid; }
         }
@@ -194,25 +209,25 @@
 
 <div class="container">
     <div class="report-header">
-        <h1>📊 التقرير المتقدم</h1>
+        <h1><i class="fas fa-chart-line"></i> التقرير المتقدم</h1>
         <p>نظرة شاملة على أداء الطلبيات والمبيعات</p>
     </div>
 
-    <button onclick="window.print()" class="btn-print">🖨️ طباعة التقرير</button>
+    <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> طباعة التقرير</button>
 
     <div class="filters">
         <form method="GET" action="{{ route('orders.advancedReport') }}">
             <div class="filter-row">
                 <div class="filter-group">
-                    <label>من تاريخ:</label>
+                    <label><i class="fas fa-calendar-alt"></i> من تاريخ:</label>
                     <input type="date" name="from_date" value="{{ $fromDate ?? '' }}">
                 </div>
                 <div class="filter-group">
-                    <label>إلى تاريخ:</label>
+                    <label><i class="fas fa-calendar-alt"></i> إلى تاريخ:</label>
                     <input type="date" name="to_date" value="{{ $toDate ?? '' }}">
                 </div>
                 <div class="filter-group">
-                    <label>نوع المخزن:</label>
+                    <label><i class="fas fa-warehouse"></i> نوع المخزن:</label>
                     <select name="warehouse_type">
                         <option value="">الكل</option>
                         <option value="محلي"     {{ request('warehouse_type') == 'محلي'     ? 'selected' : '' }}>محلي</option>
@@ -220,24 +235,24 @@
                         <option value="تصدير"    {{ request('warehouse_type') == 'تصدير'    ? 'selected' : '' }}>تصدير</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-filter">🔍 بحث</button>
+                <button type="submit" class="btn-filter"><i class="fas fa-search"></i> بحث</button>
             </div>
         </form>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon">📋</div>
+            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
             <div class="stat-value">{{ number_format($totalOrders) }}</div>
             <div class="stat-label">إجمالي الطلبيات</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">📦</div>
+            <div class="stat-icon"><i class="fas fa-cubes"></i></div>
             <div class="stat-value">{{ number_format($totalQuantity) }}</div>
             <div class="stat-label">إجمالي القطع</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">👥</div>
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
             <div class="stat-value">{{ $activeUsers }}</div>
             <div class="stat-label">المستخدمين النشطين</div>
         </div>
@@ -245,7 +260,7 @@
 
     <!-- تقرير حسب نوع الصنف -->
     <div class="section-card">
-        <div class="section-title">🏷️ التقرير حسب نوع الصنف</div>
+        <div class="section-title"><i class="fas fa-tags"></i> التقرير حسب نوع الصنف</div>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -283,7 +298,7 @@
 
     <!-- تقرير حسب مندوب المبيعات -->
     <div class="section-card">
-        <div class="section-title">👤 تقرير حسب مندوب المبيعات</div>
+        <div class="section-title"><i class="fas fa-user-friends"></i> تقرير حسب مندوب المبيعات</div>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -318,7 +333,7 @@
 
     <!-- تقرير تفصيلي بالأصناف مع فلترة وبحث -->
     <div class="section-card">
-        <div class="section-title">📋 التقرير التفصيلي للأصناف</div>
+        <div class="section-title"><i class="fas fa-boxes"></i> التقرير التفصيلي للأصناف</div>
 
         <div class="search-bar">
             <form method="GET" action="{{ route('orders.advancedReport') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%;">
@@ -329,10 +344,10 @@
                        name="product_search"
                        placeholder="🔍 بحث بكود أو اسم الصنف"
                        value="{{ request('product_search') }}">
-                <button type="submit" class="btn-filter">🔍 بحث في الأصناف</button>
+                <button type="submit" class="btn-filter"><i class="fas fa-search"></i> بحث في الأصناف</button>
                 @if(request('product_search'))
                     <a href="{{ route('orders.advancedReport', array_filter(['from_date' => $fromDate, 'to_date' => $toDate, 'warehouse_type' => request('warehouse_type')])) }}"
-                       class="btn-reset">🗑️ إلغاء</a>
+                       class="btn-reset"><i class="fas fa-times"></i> إلغاء</a>
                 @endif
             </form>
         </div>
@@ -341,12 +356,12 @@
             <table>
                 <thead>
                     <tr>
-                        <th>كود الصنف</th>
-                        <th>اسم الصنف</th>
-                        <th>الكمية المباعة</th>
-                        <th>عدد الطلبيات</th>
-                        <th>الرصيد الحالي</th>
-                        <th>الحالة</th>
+                        <th><i class="fas fa-barcode"></i> كود الصنف</th>
+                        <th><i class="fas fa-tag"></i> اسم الصنف</th>
+                        <th><i class="fas fa-chart-simple"></i> الكمية المباعة</th>
+                        <th><i class="fas fa-file-alt"></i> عدد الطلبيات</th>
+                        <th><i class="fas fa-warehouse"></i> الرصيد الحالي</th>
+                        <th><i class="fas fa-chart-line"></i> الحالة</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -368,25 +383,25 @@
                         <td>{{ $product['orders_count'] }}</td>
                         <td>
                             @if($product['current_stock'] <= 0)
-                                <span class="badge badge-danger">نفد</span>
+                                <span class="badge badge-danger"><i class="fas fa-times-circle"></i> نفد</span>
                             @elseif($product['current_stock'] < 50)
-                                <span class="badge badge-warning">{{ number_format($product['current_stock']) }}</span>
+                                <span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> {{ number_format($product['current_stock']) }}</span>
                             @else
-                                <span class="badge badge-success">{{ number_format($product['current_stock']) }}</span>
+                                <span class="badge badge-success"><i class="fas fa-check-circle"></i> {{ number_format($product['current_stock']) }}</span>
                             @endif
                         </td>
                         <td>
                             @if($product['is_low'])
-                                <span class="badge badge-danger">⚠️ منخفض</span>
+                                <span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> منخفض</span>
                             @else
-                                <span class="badge badge-success">✅ متوفر</span>
+                                <span class="badge badge-success"><i class="fas fa-check-circle"></i> متوفر</span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 30px; color: #999;">
-                            لا توجد نتائج تطابق معايير البحث
+                            <i class="fas fa-inbox"></i> لا توجد نتائج تطابق معايير البحث
                         </td>
                     </tr>
                     @endforelse

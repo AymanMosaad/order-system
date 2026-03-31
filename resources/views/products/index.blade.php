@@ -1,36 +1,44 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>الأصناف - جلوريا للسيراميك</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { box-sizing: border-box; }
         body {
-            font-family: 'Tahoma', Arial, sans-serif;
+            font-family: 'Segoe UI', 'Tahoma', Arial, sans-serif;
             direction: rtl;
-            margin: 0;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             padding: 20px;
+            padding-top: 90px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-        h2 { text-align: center; color: #333; margin-bottom: 30px; }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .page-header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .page-header p { margin: 0; opacity: 0.85; font-size: 14px; }
 
         /* فلاتر البحث */
-        .filters {
+        .filters-card {
             background: white;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: flex-end;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .filter-group {
-            display: flex;
-            flex-direction: column;
+            display: inline-block;
+            margin: 0 10px 10px 0;
         }
         .filter-group label {
             font-weight: bold;
@@ -52,7 +60,6 @@
             padding: 8px 20px;
             border-radius: 6px;
             cursor: pointer;
-            height: 38px;
         }
         .btn-reset {
             background: #6c757d;
@@ -62,34 +69,35 @@
             border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            height: 38px;
-            line-height: 22px;
         }
 
-        .btn {
+        .btn-custom {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            margin-left: 10px;
             border: none;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-left: 10px;
+            margin-bottom: 20px;
         }
-        .btn:hover { background-color: #218838; }
-        .btn-report { background-color: #17a2b8; }
-        .btn-report:hover { background-color: #138496; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
 
+        .table-responsive-custom {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            overflow: hidden;
+            min-width: 800px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -97,40 +105,25 @@
             text-align: center;
         }
         th {
-            background-color: #333;
+            background: #333;
             color: white;
             font-weight: bold;
         }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #f0f0f0; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        tr:hover { background: #f0f0f0; }
 
         .stock-badge {
             padding: 5px 10px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             display: inline-block;
         }
-        .stock-high { background-color: #d4edda; color: #155724; }
-        .stock-low { background-color: #fff3cd; color: #856404; }
-        .stock-out { background-color: #f8d7da; color: #721c24; }
+        .stock-high { background: #d4edda; color: #155724; }
+        .stock-low { background: #fff3cd; color: #856404; }
+        .stock-out { background: #f8d7da; color: #721c24; }
 
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-            margin: 2px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .btn-view { background-color: #17a2b8; color: white; }
-        .btn-edit { background-color: #ffc107; color: #333; }
-        .btn-delete { background-color: #dc3545; color: white; }
-        .btn-sm:hover { opacity: 0.8; }
-
-        .pagination-container {
+        .pagination-custom {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -160,32 +153,32 @@
             border-color: #007bff;
         }
 
-        .alert {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
+        .alert { padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
 
+        /* رسالة منع الوصول */
+        .access-denied {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .access-denied .icon { font-size: 64px; color: #dc3545; margin-bottom: 20px; }
+        .access-denied h3 { color: #dc3545; margin-bottom: 15px; }
+        .access-denied p { color: #666; margin-bottom: 20px; }
+
         @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .filter-group input, .filter-group select {
-                width: 100%;
-            }
-            .btn-filter, .btn-reset {
-                width: 100%;
-            }
-            table {
-                font-size: 12px;
-            }
-            th, td {
-                padding: 8px;
-            }
+            body { padding: 10px; padding-top: 80px; }
+            .filter-group { display: block; margin: 10px 0; }
+            .filter-group input, .filter-group select { width: 100%; }
+            .btn-filter, .btn-reset { width: 100%; margin-top: 10px; }
+            .btn-custom { display: block; width: 100%; margin-bottom: 10px; text-align: center; }
+            table { font-size: 12px; }
+            th, td { padding: 8px; }
+            .pagination-custom { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -194,115 +187,134 @@
 @include('layouts.navbar')
 
 <div class="container">
-    <h2>📦 قائمة الأصناف والأرصدة</h2>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    <div>
-        <a href="{{ route('products.create') }}" class="btn">➕ إضافة صنف جديد</a>
-        <a href="{{ route('products.report') }}" class="btn btn-report">📊 تقرير الأصناف</a>
-        <a href="{{ route('products.importPage') }}" class="btn" style="background-color: #17a2b8;">⬆️ استيراد من Excel</a>
-        <a href="{{ route('products.downloadTemplate') }}" class="btn" style="background-color: #ffc107; color: #333;">⬇️ تحميل قالب</a>
-    </div>
-
-    <!-- فلترة وبحث -->
-    <div class="filters">
-        <form method="GET" action="{{ route('products.index') }}" style="display: flex; flex-wrap: wrap; gap: 15px; width: 100%;">
-            <div class="filter-group">
-                <label>🔍 بحث</label>
-                <input type="text" name="search" placeholder="كود أو اسم الصنف" value="{{ request('search') }}">
-            </div>
-            <div class="filter-group">
-                <label>📌 النوع</label>
-                <select name="type">
-                    <option value="">-- جميع الأنواع --</option>
-                    @if(isset($types) && $types->count() > 0)
-                        @foreach($types as $type)
-                            <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>{{ $type }}</option>
-                        @endforeach
-                    @endif
-                </select>
-            </div>
-            <button type="submit" class="btn-filter">🔍 بحث</button>
-            <a href="{{ route('products.index') }}" class="btn-reset">🗑️ إلغاء</a>
-        </form>
-    </div>
-
-    @if($products->count() > 0)
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>كود الصنف</th>
-                        <th>النوع</th>
-                        <th>اسم الصنف</th>
-                        <th>اللون</th>
-                        <th>المقاس</th>
-                        <th>الرصيد الحالي</th>
-                        <th>الحد الأدنى</th>
-                        <th>الحالة</th>
-                        <th>الإجراءات</th>
-                    </thead>
-                <tbody>
-                    @foreach($products as $product)
-                    <tr>
-                        <td>{{ $product->id }}</td>
-                        <td><strong>{{ $product->item_code }}</strong></td>
-                        <td>{{ $product->type ?? '-' }}</td>
-                        <td style="text-align: right;">{{ $product->name }}</td>
-                        <td>{{ $product->color ?? '-' }}</td>
-                        <td>{{ $product->size ?? '-' }}</td>
-                        <td>
-                            @php $stock = $product->stock?->current_stock ?? 0; @endphp
-                            {{ number_format($stock) }}
-                        </td>
-                        <td>{{ $product->stock?->min_stock ?? '-' }}</td>
-                        <td>
-                            @if($stock <= 0)
-                                <span class="stock-badge stock-out">❌ نفد</span>
-                            @elseif($product->isLowStock())
-                                <span class="stock-badge stock-low">⚠️ منخفض</span>
-                            @else
-                                <span class="stock-badge stock-high">✅ متوفر</span>
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('products.show', $product->id) }}" class="btn-sm btn-view">عرض</a>
-                            <a href="{{ route('products.edit', $product->id) }}" class="btn-sm btn-edit">تعديل</a>
-                            <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-sm btn-delete" onclick="return confirm('هل أنت متأكد من حذف هذا الصنف؟')">حذف</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-             </table>
-        </div>
-
-        <div class="pagination-container">
-            <div class="pagination-info">
-                📄 عرض {{ $products->firstItem() }} - {{ $products->lastItem() }} من {{ $products->total() }} صنف
-            </div>
-            <div class="pagination-links">
-                {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
-            </div>
+    <!-- ===== فحص الصلاحية: المدير العام أو مدير المبيعات فقط ===== -->
+    @if(!in_array(Auth::user()->role, ['super_admin', 'sales_manager']))
+        <div class="access-denied">
+            <div class="icon"><i class="fas fa-lock"></i></div>
+            <h3>غير مصرح بالدخول</h3>
+            <p>عذراً، هذه الصفحة مخصصة للمدير العام ومدير المبيعات فقط.</p>
+            <a href="{{ route('orders.userDashboard') }}" class="btn-custom btn-info">
+                <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+            </a>
         </div>
     @else
-        <div class="alert alert-info text-center">
-            <p>لا توجد أصناف تطابق معايير البحث</p>
-            <a href="{{ route('products.create') }}" class="btn" style="background-color: #28a745;">➕ أضف صنف جديد</a>
+        <!-- المحتوى الأصلي يبدأ هنا -->
+        <div class="page-header">
+            <h1><i class="fas fa-boxes"></i> قائمة الأصناف والأرصدة</h1>
+            <p>إدارة وتتبع جميع الأصناف والمخزون</p>
         </div>
-    @endif
 
+        @if(session('success'))
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> {{ session('error') }}</div>
+        @endif
+
+        <div>
+            <!-- إضافة صنف جديد: للمدير العام ومدير المبيعات -->
+            <a href="{{ route('products.create') }}" class="btn-custom btn-success"><i class="fas fa-plus-circle"></i> إضافة صنف جديد</a>
+
+            <!-- تقرير الأصناف: للمدير العام ومدير المبيعات -->
+            <a href="{{ route('products.report') }}" class="btn-custom btn-info"><i class="fas fa-chart-line"></i> تقرير الأصناف</a>
+
+            <!-- استيراد وتحميل قالب: للمدير العام فقط -->
+            @if(Auth::user()->role == 'super_admin')
+                <a href="{{ route('products.importPage') }}" class="btn-custom btn-info"><i class="fas fa-file-import"></i> استيراد من Excel</a>
+                <a href="{{ route('products.downloadTemplate') }}" class="btn-custom btn-warning"><i class="fas fa-download"></i> تحميل قالب</a>
+            @endif
+        </div>
+
+        <!-- فلترة وبحث -->
+        <div class="filters-card">
+            <form method="GET" action="{{ route('products.index') }}" style="display: flex; flex-wrap: wrap; gap: 15px; width: 100%; align-items: flex-end;">
+                <div class="filter-group">
+                    <label><i class="fas fa-search"></i> بحث</label>
+                    <input type="text" name="search" placeholder="كود أو اسم الصنف" value="{{ request('search') }}">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> النوع</label>
+                    <select name="type">
+                        <option value="">-- جميع الأنواع --</option>
+                        @if(isset($types) && $types->count() > 0)
+                            @foreach($types as $type)
+                                <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+                <button type="submit" class="btn-filter"><i class="fas fa-search"></i> بحث</button>
+                <a href="{{ route('products.index') }}" class="btn-reset"><i class="fas fa-times"></i> إلغاء</a>
+            </form>
+        </div>
+
+        @if($products->count() > 0)
+            <div class="table-responsive-custom">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>كود الصنف</th>
+                            <th>اسم الصنف</th>
+                            <th>الرصيد الحالي</th>
+                            <th>الحد الأدنى</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($products as $product)
+                        <tr>
+                            <td>{{ $product->id }}</td>
+                            <td><strong>{{ $product->item_code }}</strong></td>
+                            <td style="text-align: right;">{{ $product->name }}</td>
+                            <td>
+                                @php $stock = $product->stock?->current_stock ?? 0; @endphp
+                                {{ number_format($stock, 2) }}
+                            </td>
+                            <td>{{ $product->stock?->min_stock ?? '-' }}</td>
+                            <td>
+                                @if($stock <= 0)
+                                    <span class="stock-badge stock-out"><i class="fas fa-times-circle"></i> نفد</span>
+                                @elseif($product->isLowStock())
+                                    <span class="stock-badge stock-low"><i class="fas fa-exclamation-triangle"></i> منخفض</span>
+                                @else
+                                    <span class="stock-badge stock-high"><i class="fas fa-check-circle"></i> متوفر</span>
+                                @endif
+                            </td>
+                            <td>
+                                <a href="{{ route('products.show', $product->id) }}" class="btn-custom btn-info btn-sm"><i class="fas fa-eye"></i> عرض</a>
+                                <a href="{{ route('products.edit', $product->id) }}" class="btn-custom btn-warning btn-sm"><i class="fas fa-edit"></i> تعديل</a>
+                                <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display: inline-block;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-custom btn-sm" style="background: #dc3545; color: white; border: none; border-radius: 6px; padding: 5px 10px;" onclick="return confirm('هل أنت متأكد من حذف هذا الصنف؟')"><i class="fas fa-trash-alt"></i> حذف</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-custom">
+                <div class="pagination-info">
+                    <i class="fas fa-file-alt"></i> عرض {{ $products->firstItem() }} - {{ $products->lastItem() }} من {{ $products->total() }} صنف
+                </div>
+                <div class="pagination-links">
+                    {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
+                </div>
+            </div>
+        @else
+            <div class="alert alert-info text-center">
+                <i class="fas fa-inbox"></i>
+                <p>لا توجد أصناف تطابق معايير البحث</p>
+                <a href="{{ route('products.create') }}" class="btn-custom btn-success"><i class="fas fa-plus-circle"></i> أضف صنف جديد</a>
+            </div>
+        @endif
+    @endif
+    <!-- ===== نهاية فحص الصلاحية ===== -->
 </div>
 
 </body>

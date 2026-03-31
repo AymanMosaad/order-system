@@ -17,6 +17,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'is_admin',
     ];
 
     protected $hidden = [
@@ -29,6 +31,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -79,5 +82,79 @@ class User extends Authenticatable
     public function getNewOrdersCount(): int
     {
         return $this->orders()->where('status', 'جديدة')->count();
+    }
+
+    // ===== دوال الصلاحيات =====
+
+    /**
+     * هل المستخدم مدير عام؟
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin' && $this->is_admin == 1;
+    }
+
+    /**
+     * هل المستخدم مدير مبيعات؟
+     */
+    public function isSalesManager(): bool
+    {
+        return $this->role === 'sales_manager' && $this->is_admin == 1;
+    }
+
+    /**
+     * هل المستخدم مندوب؟
+     */
+    public function isSalesRep(): bool
+    {
+        return $this->role === 'sales_rep' && $this->is_admin == 0;
+    }
+
+    /**
+     * هل المستخدم مصنع؟
+     */
+    public function isFactory(): bool
+    {
+        return $this->role === 'factory' && $this->is_admin == 0;
+    }
+
+    /**
+     * هل يمكنه رؤية لوحة المدير؟
+     */
+    public function canViewAdminDashboard(): bool
+    {
+        return $this->is_admin == 1;
+    }
+
+    /**
+     * هل يمكنه إدارة المستخدمين؟
+     */
+    public function canManageUsers(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    /**
+     * هل يمكنه استيراد المنتجات؟
+     */
+    public function canImportProducts(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    /**
+     * هل يمكنه رؤية كل الطلبيات؟
+     */
+    public function canViewAllOrders(): bool
+    {
+        return in_array($this->role, ['super_admin', 'sales_manager']);
+    }
+
+    /**
+     * هل يمكنه رؤية التقارير؟
+     */
+    public function canViewReports(): bool
+    {
+        return in_array($this->role, ['super_admin', 'sales_manager']);
     }
 }

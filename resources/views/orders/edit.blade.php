@@ -2,20 +2,23 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تعديل الطلبية #{{ $order->id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>تعديل الطلبية #{{ $order->id }} - جلوريا للسيراميك</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { box-sizing: border-box; }
         body {
-            font-family: 'Tahoma', Arial, sans-serif;
+            font-family: 'Segoe UI', 'Tahoma', Arial, sans-serif;
             direction: rtl;
-            margin: 0;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             padding: 20px;
+            padding-top: 90px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
 
-        .header {
+        /* Header */
+        .page-header {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             padding: 25px 30px;
@@ -27,9 +30,9 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        .header h1 { margin: 0 0 5px 0; font-size: 24px; }
-        .header p  { margin: 0; opacity: 0.85; font-size: 14px; }
-        .header-badge {
+        .page-header h1 { margin: 0 0 5px 0; font-size: 24px; }
+        .page-header p  { margin: 0; opacity: 0.85; font-size: 14px; }
+        .page-badge {
             background: rgba(255,255,255,0.2);
             padding: 8px 20px;
             border-radius: 20px;
@@ -37,7 +40,8 @@
             font-weight: bold;
         }
 
-        .card {
+        /* Cards */
+        .form-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -53,25 +57,36 @@
             border-bottom: 3px solid #f5576c;
             display: inline-block;
         }
+        .card-title i {
+            margin-left: 8px;
+            color: #f5576c;
+        }
 
+        /* Form */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 18px;
         }
-        .form-group { display: flex; flex-direction: column; }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
         .form-group label {
             font-weight: bold;
             color: #555;
             margin-bottom: 7px;
             font-size: 13px;
         }
+        .form-group label i {
+            margin-left: 5px;
+            color: #f5576c;
+        }
         .form-group input, .form-group select, .form-group textarea {
             padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
-            font-family: 'Tahoma', Arial, sans-serif;
             transition: all 0.3s;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -79,24 +94,54 @@
             border-color: #f5576c;
             box-shadow: 0 0 0 3px rgba(245,87,108,0.1);
         }
-        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .required {
+            color: #dc3545;
+            margin-right: 4px;
+        }
 
-        .table-wrapper { overflow-x: auto; margin: 15px 0; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th, td { border: 1px solid #eee; padding: 11px 12px; text-align: center; font-size: 13px; }
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+        th, td {
+            border: 1px solid #eee;
+            padding: 11px 12px;
+            text-align: center;
+            font-size: 13px;
+        }
         th {
             background: #f8f9fa;
             color: #333;
             font-weight: bold;
             border-bottom: 2px solid #dee2e6;
         }
-        tr:hover { background: #fff5f5; }
+        tr:hover {
+            background: #fff5f5;
+        }
 
-        .stock-info { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 5px; }
+        /* Stock Info */
+        .stock-info {
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 5px;
+            display: inline-block;
+        }
         .stock-ok      { background: #d4edda; color: #155724; }
         .stock-low     { background: #fff3cd; color: #856404; }
         .stock-danger  { background: #f8d7da; color: #721c24; }
 
+        /* Buttons */
         .btn {
             padding: 10px 22px;
             border: none;
@@ -115,13 +160,26 @@
         .btn-save   { background: #f5576c; color: white; width: 100%; justify-content: center; padding: 13px; font-size: 15px; }
         .btn-delete { background: #dc3545; color: white; padding: 6px 12px; font-size: 12px; }
 
-        .alert { padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; }
+        /* Alert */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
         .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
+        /* Responsive */
         @media (max-width: 768px) {
-            .header { flex-direction: column; text-align: center; }
+            body { padding: 10px; padding-top: 80px; }
+            .page-header { flex-direction: column; text-align: center; }
             .form-grid { grid-template-columns: 1fr; }
             th, td { padding: 8px; font-size: 12px; }
+            .btn-add, .btn-save { padding: 8px 16px; font-size: 13px; }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 { font-size: 20px; }
+            .card-title { font-size: 16px; }
         }
     </style>
 </head>
@@ -131,46 +189,46 @@
 
 <div class="container">
 
-    <div class="header">
+    <div class="page-header">
         <div>
-            <h1>✏️ تعديل الطلبية</h1>
+            <h1><i class="fas fa-edit"></i> تعديل الطلبية</h1>
             <p>{{ $order->customer_name }} — {{ $order->date->format('Y-m-d') }}</p>
         </div>
-        <div class="header-badge"># {{ $order->id }}</div>
+        <div class="page-badge"><i class="fas fa-hashtag"></i> {{ $order->id }}</div>
     </div>
 
     @if($errors->any())
         <div class="alert alert-danger">
-            <strong>❌ خطأ!</strong>
+            <strong><i class="fas fa-exclamation-triangle"></i> خطأ!</strong>
             <ul style="margin: 8px 0; padding-right: 20px;">
                 @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
+                    <li><i class="fas fa-times-circle"></i> {{ $error }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
 
-    <form method="POST" action="{{ route('orders.update', $order->id) }}">
+    <form method="POST" action="{{ route('orders.update', $order->id) }}" id="orderForm">
         @csrf
         @method('PUT')
 
-        <div class="card">
-            <div class="card-title">📋 بيانات الطلبية</div>
+        <div class="form-card">
+            <div class="card-title"><i class="fas fa-info-circle"></i> بيانات الطلبية</div>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>اسم العميل <span style="color:red;">*</span></label>
+                    <label><i class="fas fa-user-tie"></i> اسم العميل <span class="required">*</span></label>
                     <input type="text" name="customer_name" value="{{ $order->customer_name }}" required>
                 </div>
                 <div class="form-group">
-                    <label>اسم التاجر</label>
+                    <label><i class="fas fa-store"></i> اسم التاجر</label>
                     <input type="text" name="trader_name" value="{{ $order->trader_name }}">
                 </div>
                 <div class="form-group">
-                    <label>رقم الإذن</label>
+                    <label><i class="fas fa-hashtag"></i> رقم الإذن</label>
                     <input type="text" name="order_number" value="{{ $order->order_number }}">
                 </div>
                 <div class="form-group">
-                    <label>نوع المخزن</label>
+                    <label><i class="fas fa-warehouse"></i> نوع المخزن</label>
                     <select name="warehouse_type">
                         <option value="">-- اختر نوع المخزن --</option>
                         <option value="محلي"      {{ $order->warehouse_type == 'محلي'      ? 'selected' : '' }}>محلي</option>
@@ -182,39 +240,39 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>العنوان / المنطقة</label>
+                    <label><i class="fas fa-location-dot"></i> العنوان / المنطقة</label>
                     <input type="text" name="address" value="{{ $order->address }}">
                 </div>
                 <div class="form-group">
-                    <label>رقم الهاتف</label>
+                    <label><i class="fas fa-phone"></i> رقم الهاتف</label>
                     <input type="text" name="phone" value="{{ $order->phone }}">
                 </div>
                 <div class="form-group">
-                    <label>اسم السائق</label>
+                    <label><i class="fas fa-truck"></i> اسم السائق</label>
                     <input type="text" name="driver_name" value="{{ $order->driver_name }}">
                 </div>
                 <div class="form-group">
-                    <label>التاريخ <span style="color:red;">*</span></label>
+                    <label><i class="fas fa-calendar-day"></i> التاريخ <span class="required">*</span></label>
                     <input type="date" name="date" value="{{ $order->date->format('Y-m-d') }}" required>
                 </div>
                 <div class="form-group" style="grid-column: 1 / -1;">
-                    <label>ملاحظات</label>
+                    <label><i class="fas fa-pen"></i> ملاحظات</label>
                     <textarea name="notes">{{ $order->notes }}</textarea>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-title">📦 تفاصيل الأصناف</div>
+        <div class="form-card">
+            <div class="card-title"><i class="fas fa-cubes"></i> تفاصيل الأصناف</div>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>كود الصنف</th>
-                            <th>اسم الصنف</th>
-                            <th>الرصيد المتوفر</th>
-                            <th>الكمية</th>
-                            <th>حذف</th>
+                            <th><i class="fas fa-barcode"></i> كود الصنف</th>
+                            <th><i class="fas fa-tag"></i> اسم الصنف</th>
+                            <th><i class="fas fa-warehouse"></i> الرصيد المتوفر</th>
+                            <th><i class="fas fa-weight-hanging"></i> الكمية</th>
+                            <th><i class="fas fa-trash-alt"></i> حذف</th>
                         </tr>
                     </thead>
                     <tbody id="items">
@@ -232,16 +290,16 @@
                             </td>
                             <td>
                                 <div class="stock-info stock-ok" id="stock_{{ $index }}">
-                                    📦 متوفر: {{ $item->product?->getCurrentStock() ?? 0 }}
+                                    <i class="fas fa-check-circle"></i> متوفر: {{ $item->product?->getCurrentStock() ?? 0 }}
                                 </div>
                             </td>
                             <td>
                                 <input type="number" name="items[{{ $index }}][quantity]"
-                                       value="{{ $item->grade1 ?? 0 }}" min="0"
+                                       value="{{ $item->grade1 ?? 0 }}" min="0" step="0.01"
                                        style="width:100px; text-align:center; padding:8px; border:1px solid #ddd; border-radius:6px;">
                             </td>
                             <td>
-                                <button type="button" class="btn btn-delete" onclick="deleteItem(this)">✖</button>
+                                <button type="button" class="btn btn-delete" onclick="deleteItem(this)"><i class="fas fa-trash-alt"></i></button>
                             </td>
                         </tr>
                         @endforeach
@@ -250,11 +308,13 @@
             </div>
 
             <button type="button" class="btn btn-add" onclick="addItem()" style="margin-top: 10px;">
-                ➕ إضافة صنف
+                <i class="fas fa-plus-circle"></i> إضافة صنف
             </button>
         </div>
 
-        <button type="submit" class="btn btn-save">💾 حفظ التعديلات</button>
+        <button type="submit" class="btn btn-save">
+            <i class="fas fa-save"></i> حفظ التعديلات
+        </button>
     </form>
 </div>
 
@@ -276,10 +336,10 @@ function addItem() {
         <td><input type="text" name="items[${itemIndex}][name]" class="name-input"
                    placeholder="اسم الصنف" list="productNamesList" data-index="${itemIndex}"
                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px;"></td>
-        <td><div class="stock-info" id="stock_${itemIndex}">---</div></td>
-        <td><input type="number" name="items[${itemIndex}][quantity]" value="0" min="0"
+        <td><div class="stock-info" id="stock_${itemIndex}"><i class="fas fa-warehouse"></i> ---</div></td>
+        <td><input type="number" name="items[${itemIndex}][quantity]" value="0" min="0" step="0.01"
                    style="width:100px; text-align:center; padding:8px; border:1px solid #ddd; border-radius:6px;"></td>
-        <td><button type="button" class="btn btn-delete" onclick="deleteItem(this)">✖</button></td>
+        <td><button type="button" class="btn btn-delete" onclick="deleteItem(this)"><i class="fas fa-trash-alt"></i></button></td>
     `;
     tbody.appendChild(row);
     itemIndex++;
@@ -288,7 +348,7 @@ function addItem() {
 function handleNameInput(e) {
     if (!e.target.classList.contains('name-input')) return;
     const name = e.target.value.trim();
-    if (name.length < 3) return;
+    if (name.length < 2) return;
     const idx = parseInt(e.target.dataset.index);
     fetch(`/products/get-by-name/${encodeURIComponent(name)}`)
         .then(res => res.json())
@@ -298,7 +358,7 @@ function handleNameInput(e) {
                 row.querySelector('input[name*="item_code"]').value = data.product.item_code || '';
                 const stockDiv = document.getElementById(`stock_${idx}`);
                 const s = data.product.stock1 || 0;
-                stockDiv.innerHTML = `📦 متوفر: ${s}`;
+                stockDiv.innerHTML = `<i class="fas fa-warehouse"></i> متوفر: ${s}`;
                 stockDiv.className = `stock-info ${s > 50 ? 'stock-ok' : s > 10 ? 'stock-low' : 'stock-danger'}`;
             }
         })
@@ -311,6 +371,14 @@ document.addEventListener('change', handleNameInput);
 function deleteItem(btn) {
     btn.closest('tr').remove();
 }
+
+// منع إرسال فورم بدون أصناف
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    if (document.querySelectorAll('#items tr').length === 0) {
+        e.preventDefault();
+        alert('⚠️ يجب إضافة صنف واحد على الأقل');
+    }
+});
 </script>
 
 </body>

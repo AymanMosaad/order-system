@@ -16,7 +16,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')
                 ->with('error', 'غير مصرح لك بعرض الأصناف');
         }
@@ -62,7 +63,8 @@ class ProductController extends Controller
 
     public function create()
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
         return view('products.create');
@@ -70,7 +72,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -116,7 +119,8 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -131,7 +135,8 @@ class ProductController extends Controller
 
     public function edit($id)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -146,7 +151,8 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -192,7 +198,8 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -243,7 +250,8 @@ class ProductController extends Controller
      */
     public function import(Request $request)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام فقط (لأن الاستيراد حساس)
+        if (Auth::user()->role != 'super_admin') {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -283,7 +291,8 @@ class ProductController extends Controller
 
     public function importPage()
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام فقط
+        if (Auth::user()->role != 'super_admin') {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
         return view('products.import');
@@ -291,7 +300,8 @@ class ProductController extends Controller
 
     public function downloadTemplate()
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام فقط
+        if (Auth::user()->role != 'super_admin') {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -336,7 +346,8 @@ class ProductController extends Controller
 
     public function report()
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -369,7 +380,8 @@ class ProductController extends Controller
 
     public function stockReport(Request $request)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك بالدخول');
         }
 
@@ -432,7 +444,8 @@ class ProductController extends Controller
 
     public function adjustStock(Request $request, $id)
     {
-        if (Auth::user()->is_admin != 1) {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
             return redirect()->route('orders.userDashboard')->with('error', 'غير مصرح لك');
         }
 
@@ -470,4 +483,52 @@ class ProductController extends Controller
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
+    public function gradeReport()
+    {
+        // التعديل: المدير العام أو مدير المبيعات فقط
+        if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
+            return redirect()->route('orders.userDashboard')
+                ->with('error', 'غير مصرح لك بالدخول');
+        }
+
+        $grades = ['أول', 'ثاني', 'ثالث', 'رابع'];
+
+        $report = [];
+        foreach ($grades as $grade) {
+            $products = Product::with('stock')
+                ->where('grade', $grade)
+                ->where('is_active', true)
+                ->get();
+
+            $totalStock = $products->sum(fn($p) => $p->stock->current_stock ?? 0);
+
+            $bySize = [];
+            foreach ($products as $product) {
+                $size = $product->size ?? 'غير محدد';
+                if (!isset($bySize[$size])) {
+                    $bySize[$size] = 0;
+                }
+                $bySize[$size] += $product->stock->current_stock ?? 0;
+            }
+
+            $report[$grade] = [
+                'count' => $products->count(),
+                'total_stock' => $totalStock,
+                'by_size' => $bySize
+            ];
+        }
+
+        return view('products.grade_report', ['report' => $report]);
+    }
+
+    /**
+     * عرض طلبيات المصنع - ملاحظة: دي موجودة أصلاً في OrderController
+     * خلينا نشيلها من هنا عشان ما تتكررش
+     */
+    // public function factoryOrders()
+    // {
+    //     $orders = Order::with('user', 'items')->latest()->paginate(20);
+    //     return view('factory.orders', ['orders' => $orders]);
+    // }
 }
