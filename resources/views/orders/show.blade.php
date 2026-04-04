@@ -87,6 +87,108 @@
         }
         .info-item span { color: #333; font-size: 15px; font-weight: 600; }
 
+        .desktop-table {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .desktop-table table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+        .desktop-table th, .desktop-table td {
+            border: 1px solid #eee;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .desktop-table th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .desktop-table tr:hover { background: #f9f9ff; }
+
+        .mobile-items {
+            display: none;
+            gap: 12px;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+
+        .item-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            border-right: 3px solid #007bff;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-number {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 14px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .item-label {
+            min-width: 70px;
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .item-value {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .item-total {
+            background: #fff3cd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .mobile-total-card {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .mobile-total-card .total-label {
+            font-size: 14px;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .mobile-total-card .total-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #856404;
+        }
+
         .status-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -100,35 +202,21 @@
         .status-cancelled { background: #f8d7da; color: #721c24; }
         .status-factory { background: #17a2b8; color: white; }
 
-        .table-responsive-custom {
-            overflow-x: auto;
-            margin-top: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 500px;
-        }
-        th, td {
-            border: 1px solid #eee;
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-        }
-        th {
-            background: #f8f9fa;
-            color: #333;
-            font-weight: bold;
-            border-bottom: 2px solid #dee2e6;
-        }
-        tr:hover { background: #f9f9ff; }
-        td:nth-child(3) { text-align: right; }
-
         .total-row {
             font-weight: bold;
             background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
         }
         .total-row td { font-size: 15px; }
+
+        .discount-badge {
+            background: #ffc107;
+            color: #212529;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
 
         .actions {
             display: flex;
@@ -147,6 +235,7 @@
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 7px;
             text-decoration: none;
         }
@@ -156,69 +245,29 @@
         .btn-print   { background: #17a2b8; color: white; }
         .btn-delete  { background: #dc3545; color: white; }
         .btn-factory { background: #fd7e14; color: white; }
+        .btn-success-disabled { background: #28a745; color: white; cursor: default; }
 
         .alert { padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
         @media print {
-            body {
-                padding: 0 !important;
-                margin: 0 !important;
-                background: white;
-            }
-            .navbar-custom, .btn, .actions, .page-badge, .btn-print, .btn-back, .btn-edit, .btn-delete, .btn-factory {
-                display: none !important;
-            }
-            .page-header {
-                background: #333 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                margin-bottom: 20px;
-                padding: 15px;
-            }
-            .container {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .info-card {
-                break-inside: avoid;
-                page-break-inside: avoid;
-                box-shadow: none;
-                border: 1px solid #ddd;
-                margin-bottom: 15px;
-            }
-            table {
-                width: 100% !important;
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-            .info-grid {
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-            .total-row {
-                background: #f5f5f5 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
+            body { padding: 0 !important; margin: 0 !important; background: white; }
+            .navbar-custom, .btn, .actions, .page-badge, .btn-print, .btn-back, .btn-edit, .btn-delete, .btn-factory { display: none !important; }
+            .page-header { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin-bottom: 20px; padding: 15px; }
+            .container { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .info-card { break-inside: avoid; page-break-inside: avoid; box-shadow: none; border: 1px solid #ddd; margin-bottom: 15px; }
+            .desktop-table table { width: 100% !important; break-inside: avoid; page-break-inside: avoid; }
+            .mobile-items { display: none !important; }
         }
 
         @media (max-width: 768px) {
             body { padding: 10px; padding-top: 80px; }
             .page-header { flex-direction: column; text-align: center; }
             .page-header h1 { font-size: 22px; }
-            th, td { padding: 8px; font-size: 12px; }
-            .btn { padding: 9px 15px; font-size: 13px; }
-            .info-item span { font-size: 13px; }
-            .actions { gap: 8px; }
-        }
-
-        @media (max-width: 576px) {
-            .btn { padding: 7px 12px; font-size: 12px; }
-            .info-grid { grid-template-columns: 1fr; }
+            .btn { padding: 10px 18px; font-size: 13px; min-width: 100px; }
+            .desktop-table { display: none; }
+            .mobile-items { display: flex; }
         }
     </style>
 </head>
@@ -242,17 +291,7 @@
     @if(session('error'))
         <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> {{ session('error') }}</div>
     @endif
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <ul style="margin: 0; padding-right: 20px;">
-                @foreach($errors->all() as $error)
-                    <li><i class="fas fa-times-circle"></i> {{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
-    <!-- بيانات الطلبية -->
     <div class="info-card">
         <div class="card-title"><i class="fas fa-info-circle"></i> بيانات الطلبية</div>
         <div class="info-grid">
@@ -267,6 +306,16 @@
             <div class="info-item">
                 <strong><i class="fas fa-hashtag"></i> رقم الإذن</strong>
                 <span>{{ $order->order_number ?? '-' }}</span>
+            </div>
+            <div class="info-item">
+                <strong><i class="fas fa-percent"></i> خصم الطلبية</strong>
+                <span>
+                    @if($order->order_discount > 0)
+                        <span class="discount-badge">{{ $order->order_discount }}% خصم</span>
+                    @else
+                        -
+                    @endif
+                </span>
             </div>
             <div class="info-item">
                 <strong><i class="fas fa-warehouse"></i> نوع المخزن</strong>
@@ -311,35 +360,113 @@
     <!-- الأصناف -->
     <div class="info-card">
         <div class="card-title"><i class="fas fa-cubes"></i> الأصناف</div>
-        <div class="table-responsive-custom">
-             <table class="table table-bordered">
+
+        @php
+            $orderTotal = 0;
+            foreach($order->items as $item) {
+                $itemTotal = $item->grade1 * $item->unit_price;
+                if ($order->order_discount > 0) {
+                    $itemTotal = $itemTotal - ($itemTotal * $order->order_discount / 100);
+                }
+                $orderTotal += $itemTotal;
+            }
+        @endphp
+
+        <div class="desktop-table">
+            <table class="table table-bordered">
                 <thead>
-                       <tr>
+                    <tr>
                         <th>#</th>
                         <th><i class="fas fa-barcode"></i> كود الصنف</th>
                         <th><i class="fas fa-tag"></i> اسم الصنف</th>
                         <th><i class="fas fa-weight-hanging"></i> الكمية</th>
+                        <th><i class="fas fa-chart-line"></i> السعر</th>
                         <th><i class="fas fa-chart-line"></i> الإجمالي</th>
-                       </tr>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach($order->items as $i => $item)
-                       <tr>
-                           <td>{{ $i + 1 }}</td>
-                           <td>{{ $item->item_code }}</td>
-                          <td style="text-align: right;">{{ $item->name }}</td>
-                           <td>{{ number_format($item->grade1, 2) }}</td>
-                           <td><strong>{{ number_format($item->total, 2) }}</strong></td>
-                       </tr>
+                        @php
+                            $itemTotal = $item->grade1 * $item->unit_price;
+                            $displayTotal = $itemTotal;
+                            if ($order->order_discount > 0) {
+                                $displayTotal = $itemTotal - ($itemTotal * $order->order_discount / 100);
+                            }
+                        @endphp
+                        <tr>
+                            <td>{{ $i + 1 }}</td>
+                            <td>{{ $item->item_code }}</td>
+                            <td style="text-align: right;">{{ $item->name }}</td>
+                            <td>{{ number_format($item->grade1, 2) }}</td>
+                            <td>{{ number_format($item->unit_price, 2) }}</td>
+                            <td><strong>{{ number_format($displayTotal, 2) }}</strong></td>
+                        </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     <tr class="total-row">
-                        <td colspan="4" style="text-align: left; font-weight: bold;"><i class="fas fa-calculator"></i> الإجمالي الكلي</td>
-                        <td style="font-weight: bold;">{{ number_format($order->items->sum('total'), 2) }}</td>
+                        <td colspan="5" style="text-align: left; font-weight: bold;"><i class="fas fa-calculator"></i> الإجمالي الكلي</td>
+                        <td style="font-weight: bold;">{{ number_format($orderTotal, 2) }}</td>
                     </tr>
+                    @if($order->order_discount > 0)
+                    <tr class="total-row">
+                        <td colspan="5" style="text-align: left; font-weight: bold;"><i class="fas fa-tag"></i> قيمة الخصم ({{ $order->order_discount }}%)</td>
+                        <td style="font-weight: bold; color: #dc3545;">- {{ number_format(($order->items->sum(function($item) { return $item->grade1 * $item->unit_price; }) * $order->order_discount / 100), 2) }}</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="5" style="text-align: left; font-weight: bold;"><i class="fas fa-money-bill-wave"></i> الإجمالي بعد الخصم</td>
+                        <td style="font-weight: bold; color: #28a745;">{{ number_format($orderTotal, 2) }}</td>
+                    </tr>
+                    @endif
                 </tfoot>
-              </table>
+            </table>
+        </div>
+
+        <div class="mobile-items">
+            @foreach($order->items as $i => $item)
+                @php
+                    $itemTotal = $item->grade1 * $item->unit_price;
+                    $displayTotal = $itemTotal;
+                    if ($order->order_discount > 0) {
+                        $displayTotal = $itemTotal - ($itemTotal * $order->order_discount / 100);
+                    }
+                @endphp
+                <div class="item-card">
+                    <div class="item-header">
+                        <span class="item-number"><i class="fas fa-cube"></i> صنف #{{ $i + 1 }}</span>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-label"><i class="fas fa-barcode"></i> الكود:</div>
+                        <div class="item-value">{{ $item->item_code }}</div>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-label"><i class="fas fa-tag"></i> الاسم:</div>
+                        <div class="item-value">{{ $item->name }}</div>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-label"><i class="fas fa-weight-hanging"></i> الكمية:</div>
+                        <div class="item-value">{{ number_format($item->grade1, 2) }}</div>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-label"><i class="fas fa-chart-line"></i> السعر:</div>
+                        <div class="item-value">{{ number_format($item->unit_price, 2) }}</div>
+                    </div>
+                    <div class="item-total">
+                        <i class="fas fa-chart-line"></i> الإجمالي: <strong>{{ number_format($displayTotal, 2) }}</strong>
+                    </div>
+                </div>
+            @endforeach
+
+            <div class="mobile-total-card">
+                <div class="total-label"><i class="fas fa-calculator"></i> الإجمالي الكلي للطلبية</div>
+                <div class="total-value">{{ number_format($orderTotal, 2) }}</div>
+                @if($order->order_discount > 0)
+                    <div class="total-label" style="margin-top: 10px;"><i class="fas fa-tag"></i> الخصم ({{ $order->order_discount }}%)</div>
+                    <div class="total-value" style="color: #dc3545;">- {{ number_format(($order->items->sum(function($item) { return $item->grade1 * $item->unit_price; }) * $order->order_discount / 100), 2) }}</div>
+                    <div class="total-label" style="margin-top: 10px;"><i class="fas fa-money-bill-wave"></i> الإجمالي بعد الخصم</div>
+                    <div class="total-value" style="color: #28a745;">{{ number_format($orderTotal, 2) }}</div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -348,9 +475,9 @@
         <div class="actions">
             <a href="{{ route('orders.index') }}" class="btn btn-back"><i class="fas fa-arrow-right"></i> العودة للطلبيات</a>
             <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-edit"><i class="fas fa-edit"></i> تعديل</a>
-            <a href="#" onclick="window.print()" class="btn btn-print"><i class="fas fa-print"></i> طباعة</a>
-
-            <!-- زر إرسال للمصنع (للمدير العام ومدير المبيعات فقط) -->
+            <a href="{{ route('orders.invoice', $order->id) }}" class="btn btn-print" target="_blank">
+                <i class="fas fa-print"></i> فاتورة
+            </a>
             @if(in_array(Auth::user()->role, ['super_admin', 'sales_manager']) && !$order->sent_to_factory && $order->status != 'مرسلة للمصنع')
                 <form action="{{ route('orders.sendToFactory', $order->id) }}" method="POST" style="display: inline-block;">
                     @csrf
@@ -359,17 +486,14 @@
                     </button>
                 </form>
             @endif
-
-            <!-- عرض حالة الإرسال للمصنع -->
             @if($order->sent_to_factory || $order->status == 'مرسلة للمصنع')
-                <span class="btn" style="background: #28a745; color: white; cursor: default;">
+                <span class="btn btn-success-disabled">
                     <i class="fas fa-check-circle"></i> تم الإرسال للمصنع
                     @if($order->sent_to_factory_at)
                         <br><small>{{ \Carbon\Carbon::parse($order->sent_to_factory_at)->format('Y-m-d H:i') }}</small>
                     @endif
                 </span>
             @endif
-
             <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
                   onsubmit="return confirm('⚠️ هل أنت متأكد من حذف هذه الطلبية؟\nسيتم إعادة الرصيد للمخزن تلقائياً.')">
                 @csrf
@@ -380,18 +504,6 @@
     </div>
 
 </div>
-
-<script>
-    document.querySelectorAll('form[action*="destroy"]').forEach(form => {
-        form.addEventListener('submit', function() {
-            const btn = this.querySelector('button[type="submit"]');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
-            }
-        });
-    });
-</script>
 
 </body>
 </html>

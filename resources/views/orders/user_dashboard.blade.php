@@ -93,34 +93,112 @@
         .btn-success { background-color: #28a745; }
         .btn-success:hover { background-color: #218838; }
 
-        /* جدول */
-        .table-responsive-custom {
+        /* ===== تصميم الجدول للشاشات الكبيرة ===== */
+        .desktop-table {
             background: white;
             border-radius: 15px;
             overflow-x: auto;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        table {
+        .desktop-table table {
             width: 100%;
             border-collapse: collapse;
             min-width: 700px;
         }
 
-        th, td {
+        .desktop-table th, .desktop-table td {
             border: 1px solid #eee;
             padding: 12px;
             text-align: center;
         }
 
-        th {
+        .desktop-table th {
             background: #f8f9fa;
             color: #333;
             font-weight: bold;
             border-bottom: 2px solid #dee2e6;
         }
 
-        tr:hover { background: #f5f5f5; }
+        .desktop-table tr:hover { background: #f5f5f5; }
+
+        /* ===== تصميم البطاقات للموبايل ===== */
+        .mobile-cards {
+            display: none;
+            gap: 15px;
+            flex-direction: column;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border-right: 4px solid #667eea;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .order-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            background: #f0f4ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .card-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .card-label {
+            min-width: 85px;
+            font-weight: bold;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .card-value {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .card-actions .view-link {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #e3f2fd;
+        }
 
         /* حالة الطلبية */
         .status {
@@ -143,6 +221,10 @@
             border-radius: 5px;
             font-size: 13px;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
         .view-link:hover { background: #bbdefb; }
 
@@ -186,23 +268,46 @@
             border-color: #007bff;
         }
 
+        /* أزرار الإجراءات السفلية */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background: white;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .action-buttons .btn-custom {
+            margin: 0;
+            min-width: 150px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             body { padding: 10px; padding-top: 80px; }
             .stats-grid { grid-template-columns: 1fr; gap: 15px; }
             .dashboard-header h1 { font-size: 22px; }
             .dashboard-header p { font-size: 14px; }
-            table { font-size: 12px; }
-            th, td { padding: 8px; }
-            .btn-custom { padding: 8px 15px; font-size: 12px; }
-            .view-link { padding: 3px 8px; font-size: 11px; }
+
+            /* إخفاء الجدول وإظهار البطاقات */
+            .desktop-table { display: none; }
+            .mobile-cards { display: flex; }
+
             .pagination-custom { flex-direction: column; text-align: center; }
             .pagination-links { justify-content: center; }
+            .action-buttons { flex-direction: column; }
+            .action-buttons .btn-custom { width: 100%; text-align: center; }
         }
 
         @media (max-width: 480px) {
             .stat-number { font-size: 24px; }
             .stat-icon { font-size: 36px; }
+            .card-label { min-width: 70px; font-size: 12px; }
+            .card-value { font-size: 13px; }
+            .order-number { font-size: 14px; }
         }
 
         @media print {
@@ -250,7 +355,8 @@
         </div>
     </div>
 
-    <div class="table-responsive-custom">
+    <!-- عرض الجدول للشاشات الكبيرة -->
+    <div class="desktop-table">
         <div style="padding: 15px; border-bottom: 1px solid #eee;">
             <h3 class="box-title" style="margin: 0;"><i class="fas fa-clock"></i> آخر الطلبيات</h3>
         </div>
@@ -289,17 +395,17 @@
                         </td>
                     </tr>
                     @empty
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <div class="icon"><i class="fas fa-inbox"></i></div>
-                                    <p>لا توجد طلبيات حتى الآن</p>
-                                    <a href="{{ route('orders.create') }}" class="btn-custom btn-success" style="margin-top: 15px;">
-                                        <i class="fas fa-plus-circle"></i> إنشاء طلب جديد
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="icon"><i class="fas fa-inbox"></i></div>
+                                <p>لا توجد طلبيات حتى الآن</p>
+                                <a href="{{ route('orders.create') }}" class="btn-custom btn-success" style="margin-top: 15px;">
+                                    <i class="fas fa-plus-circle"></i> إنشاء طلب جديد
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -316,7 +422,79 @@
         </div>
         @endif
 
-        <div style="text-align: center; padding: 15px; border-top: 1px solid #eee;">
+        <div class="action-buttons">
+            <a href="{{ route('orders.create') }}" class="btn-custom btn-success"><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</a>
+            <a href="{{ route('orders.userDashboard') }}" class="btn-custom"><i class="fas fa-clipboard-list"></i> كل طلبياتي</a>
+        </div>
+    </div>
+
+    <!-- عرض البطاقات للموبايل -->
+    <div class="mobile-cards">
+        <div style="padding: 0 0 15px 0;">
+            <h3 style="margin: 0; font-size: 18px;"><i class="fas fa-clock"></i> آخر الطلبيات</h3>
+        </div>
+
+        @forelse($orders as $order)
+            @php
+                $statusClass = 'status-new';
+                if($order->status == 'قيد المعالجة') $statusClass = 'status-processing';
+                elseif($order->status == 'مكتملة') $statusClass = 'status-completed';
+                elseif($order->status == 'ملغية') $statusClass = 'status-cancelled';
+            @endphp
+            <div class="order-card">
+                <div class="card-header">
+                    <span class="order-number"><i class="fas fa-hashtag"></i> {{ $order->order_number ?? '#' . $order->id }}</span>
+                    <span class="status {{ $statusClass }}">{{ $order->status }}</span>
+                </div>
+
+                <div class="card-row">
+                    <div class="card-label"><i class="fas fa-user-tie"></i> العميل:</div>
+                    <div class="card-value">{{ $order->customer_name }}</div>
+                </div>
+
+                <div class="card-row">
+                    <div class="card-label"><i class="fas fa-calendar-day"></i> التاريخ:</div>
+                    <div class="card-value">{{ $order->date->format('Y-m-d') }}</div>
+                </div>
+
+                <div class="card-row">
+                    <div class="card-label"><i class="fas fa-cubes"></i> عدد الأصناف:</div>
+                    <div class="card-value">{{ $order->items->count() }} صنف</div>
+                </div>
+
+                <div class="card-row">
+                    <div class="card-label"><i class="fas fa-chart-line"></i> الإجمالي:</div>
+                    <div class="card-value"><strong>{{ number_format($order->items->sum('total')) }}</strong></div>
+                </div>
+
+                <div class="card-actions">
+                    <a href="{{ route('orders.show', $order->id) }}" class="view-link" style="flex: 1;">
+                        <i class="fas fa-eye"></i> عرض التفاصيل
+                    </a>
+                </div>
+            </div>
+        @empty
+            <div class="empty-state">
+                <div class="icon"><i class="fas fa-inbox"></i></div>
+                <p>لا توجد طلبيات حتى الآن</p>
+                <a href="{{ route('orders.create') }}" class="btn-custom btn-success" style="margin-top: 15px;">
+                    <i class="fas fa-plus-circle"></i> إنشاء طلب جديد
+                </a>
+            </div>
+        @endforelse
+
+        @if($orders->count() > 0)
+        <div class="pagination-custom">
+            <div class="pagination-info">
+                <i class="fas fa-file-alt"></i> عرض {{ $orders->firstItem() }} - {{ $orders->lastItem() }} من {{ $orders->total() }} طلبية
+            </div>
+            <div class="pagination-links">
+                {{ $orders->appends(request()->query())->links('pagination::bootstrap-4') }}
+            </div>
+        </div>
+        @endif
+
+        <div class="action-buttons">
             <a href="{{ route('orders.create') }}" class="btn-custom btn-success"><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</a>
             <a href="{{ route('orders.userDashboard') }}" class="btn-custom"><i class="fas fa-clipboard-list"></i> كل طلبياتي</a>
         </div>

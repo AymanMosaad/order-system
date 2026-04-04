@@ -10,8 +10,8 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // التحقق من أن المستخدم مسجل دخول وهو مدير (باستخدام role)
-        if (Auth::check() && in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
+        // التحقق من أن المستخدم مسجل دخول وهو مدير أو محاسب
+        if (Auth::check() && in_array(Auth::user()->role, ['super_admin', 'sales_manager', 'accountant'])) {
             return $next($request);
         }
 

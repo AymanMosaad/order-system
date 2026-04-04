@@ -12,6 +12,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'customer_id',           // أضفنا هذا الحقل
         'customer_name',
         'trader_name',
         'order_number',
@@ -26,6 +27,8 @@ class Order extends Model
         'sent_to_factory',
         'sent_to_factory_at',
         'factory_notes',
+        'order_discount',      // ✅ أضف هذا
+        'total_amount',        // ✅ أضف هذا
     ];
 
     protected $casts = [
@@ -33,6 +36,8 @@ class Order extends Model
         'sent_to_factory_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'order_discount' => 'decimal:2',   // ✅ أضف هذا
+        'total_amount' => 'decimal:2',     // ✅ أضف هذا
     ];
 
     // ===== العلاقات =====
@@ -51,6 +56,14 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * العميل (للمحاسبة)
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     // ===== دوال مساعدة =====

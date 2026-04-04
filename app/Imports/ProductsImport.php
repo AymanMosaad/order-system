@@ -6,7 +6,6 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 
@@ -16,8 +15,6 @@ class ProductsImport implements ToCollection, WithStartRow
     public int $errorCount   = 0;
     public array $errors     = [];
 
-    private static $cleared = false;
-
     public function startRow(): int
     {
         return 2;
@@ -25,20 +22,6 @@ class ProductsImport implements ToCollection, WithStartRow
 
     public function collection(Collection $rows)
     {
-        // مسح البيانات القديمة تلقائياً (مرة واحدة فقط)
-        if (!self::$cleared) {
-            try {
-                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-                ProductStock::query()->delete();
-                Product::query()->delete();
-                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-                self::$cleared = true;
-                Log::info('تم مسح البيانات القديمة بنجاح');
-            } catch (\Exception $e) {
-                Log::error('فشل مسح البيانات القديمة: ' . $e->getMessage());
-            }
-        }
-
         foreach ($rows as $index => $row) {
             $rowNum = $index + 2;
 
@@ -52,10 +35,6 @@ class ProductsImport implements ToCollection, WithStartRow
                             ? (float) $this->toString($rowArray[3])
                             : 0.0;
 
-                if (empty($itemCode) && empty($itemName)) {
-                    continue;
-                }
-
                 if (empty($itemCode)) {
                     $this->errors[] = "صف {$rowNum}: كود الصنف مطلوب";
                     $this->errorCount++;
@@ -68,35 +47,40 @@ class ProductsImport implements ToCollection, WithStartRow
                     continue;
                 }
 
-                $type = !empty($unit) ? $unit : 'حوائط جلوريا';
-                if (empty($unit)) {
-                    if (mb_strpos($itemName, 'ارضيات') !== false || mb_strpos($itemName, 'أرضيات') !== false) {
-                        $type = 'أرضيات جلوريا';
+                // ✅ البحث عن المنتج الموجود بدلاً من إنشاء جديد
+                $product = Product::where('item_code', $itemCode)->first();
+
+                if (!$product) {
+                    // المنتج غير موجود - نقوم بإنشائه
+                    $type = !empty($unit) ? $unit : 'حوائط جلوريا';
+                    if (empty($unit)) {
+                        if (mb_strpos($itemName, 'ارضيات') !== false || mb_strpos($itemName, 'أرضيات') !== false) {
+                            $type = 'أرضيات جلوريا';
+                        }
                     }
-                }
 
-                $size = '';
-                if (preg_match('/(\d+)\s*[×xX*]\s*(\d+)/', $itemName, $matches)) {
-                    $size = $matches[1] . '×' . $matches[2];
-                }
+                    $size = '';
+                    if (preg_match('/(\d+)\s*[×xX*]\s*(\d+)/', $itemName, $matches)) {
+                        $size = $matches[1] . '×' . $matches[2];
+                    }
 
-                $product = Product::updateOrCreate(
-                    ['item_code' => $itemCode],
-                    [
+                    $product = Product::create([
+                        'item_code' => $itemCode,
                         'name'      => $itemName,
                         'type'      => $type,
                         'size'      => $size ?: null,
                         'color'     => null,
                         'price'     => 0,
                         'is_active' => true,
-                    ]
-                );
+                    ]);
+                }
 
+                // ✅ تحديث الرصيد فقط (بدون مسح أي شيء)
                 ProductStock::updateOrCreate(
                     ['product_id' => $product->id],
                     [
                         'current_stock' => $stock,
-                        'min_stock'     => 0,
+                        'min_stock'     => 50, // الحد الأدنى الافتراضي
                     ]
                 );
 

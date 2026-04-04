@@ -17,7 +17,6 @@
         }
         .container { max-width: 1400px; margin: 0 auto; }
 
-        /* Header */
         .page-header {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -40,7 +39,6 @@
             font-weight: bold;
         }
 
-        /* Cards */
         .form-card {
             background: white;
             border-radius: 15px;
@@ -62,10 +60,9 @@
             color: #f5576c;
         }
 
-        /* Form */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 18px;
         }
         .form-group {
@@ -103,7 +100,6 @@
             margin-right: 4px;
         }
 
-        /* Table */
         .table-wrapper {
             overflow-x: auto;
             margin: 15px 0;
@@ -129,7 +125,6 @@
             background: #fff5f5;
         }
 
-        /* Stock Info */
         .stock-info {
             font-size: 12px;
             font-weight: bold;
@@ -141,7 +136,6 @@
         .stock-low     { background: #fff3cd; color: #856404; }
         .stock-danger  { background: #f8d7da; color: #721c24; }
 
-        /* Buttons */
         .btn {
             padding: 10px 22px;
             border: none;
@@ -156,11 +150,10 @@
             text-decoration: none;
         }
         .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-        .btn-add    { background: #28a745; color: white; }
+        .btn-add    { background: #28a745; color: white; width: 100%; }
         .btn-save   { background: #f5576c; color: white; width: 100%; justify-content: center; padding: 13px; font-size: 15px; }
         .btn-delete { background: #dc3545; color: white; padding: 6px 12px; font-size: 12px; }
 
-        /* Alert */
         .alert {
             padding: 14px 18px;
             border-radius: 10px;
@@ -168,18 +161,11 @@
         }
         .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* Responsive */
         @media (max-width: 768px) {
             body { padding: 10px; padding-top: 80px; }
             .page-header { flex-direction: column; text-align: center; }
             .form-grid { grid-template-columns: 1fr; }
             th, td { padding: 8px; font-size: 12px; }
-            .btn-add, .btn-save { padding: 8px 16px; font-size: 13px; }
-        }
-
-        @media (max-width: 576px) {
-            .page-header h1 { font-size: 20px; }
-            .card-title { font-size: 16px; }
         }
     </style>
 </head>
@@ -226,6 +212,11 @@
                 <div class="form-group">
                     <label><i class="fas fa-hashtag"></i> رقم الإذن</label>
                     <input type="text" name="order_number" value="{{ $order->order_number }}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-percent"></i> نسبة خصم الإذن (%)</label>
+                    <input type="number" name="order_discount" step="0.01" min="0" max="100" value="{{ $order->order_discount }}">
+                    <small class="text-muted">يتم تطبيق الخصم على إجمالي الطلبية</small>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-warehouse"></i> نوع المخزن</label>
@@ -372,7 +363,6 @@ function deleteItem(btn) {
     btn.closest('tr').remove();
 }
 
-// منع إرسال فورم بدون أصناف
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     if (document.querySelectorAll('#items tr').length === 0) {
         e.preventDefault();

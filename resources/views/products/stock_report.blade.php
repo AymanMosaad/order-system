@@ -153,6 +153,15 @@
             font-weight: bold;
             color: #28a745;
         }
+        .size-missing {
+            background-color: #fff3cd;
+        }
+        .size-missing .size-name {
+            color: #856404;
+        }
+        .size-missing .quantity {
+            color: #856404;
+        }
 
         .btn-print {
             background: #17a2b8;
@@ -245,22 +254,44 @@
     </div>
 
     @php
-        // تجميع الرصيد حسب المقاس
+        // تجميع الرصيد حسب المقاس (مع فصل المقاسات الفارغة)
         $sizeTotals = [];
+        $missingSizeTotal = 0;
+        $missingSizeCount = 0;
+
         foreach ($products as $product) {
-            $size = $product->size ?? 'غير محدد';
-            if (empty($size) || $size == '') {
-                $size = 'غير محدد';
-            }
+            $size = $product->size ?? null;
             $quantity = $product->stock->current_stock ?? 0;
+
+            // تخطي المنتجات بدون رصيد
+            if ($quantity <= 0) continue;
+
+            // إذا كان المقاس فارغ أو غير محدد
+            if (empty($size) || $size == '' || $size == 'غير محدد') {
+                $missingSizeTotal += $quantity;
+                $missingSizeCount++;
+                continue;
+            }
+
             if (!isset($sizeTotals[$size])) {
                 $sizeTotals[$size] = 0;
             }
             $sizeTotals[$size] += $quantity;
         }
-        // ترتيب المقاسات
-        ksort($sizeTotals);
-        $totalStock = array_sum($sizeTotals);
+
+        // ترتيب المقاسات حسب الحجم
+        $sortedSizes = array_keys($sizeTotals);
+        usort($sortedSizes, function($a, $b) {
+            // ترتيب المقاسات بالأرقام
+            preg_match('/(\d+)/', $a, $aNum);
+            preg_match('/(\d+)/', $b, $bNum);
+            $aVal = isset($aNum[1]) ? (int)$aNum[1] : 0;
+            $bVal = isset($bNum[1]) ? (int)$bNum[1] : 0;
+            if ($aVal == $bVal) return strcmp($a, $b);
+            return $aVal - $bVal;
+        });
+
+        $totalStock = array_sum($sizeTotals) + $missingSizeTotal;
     @endphp
 
     @if(request('size') && request('size') != '')
@@ -278,7 +309,7 @@
     <div class="summary">
         <div class="summary-item">
             <div class="summary-label"><i class="fas fa-boxes"></i> إجمالي الأصناف</div>
-            <div class="summary-value">{{ number_format($products->count()) }}</div>
+            <div class="summary-value">{{ number_format($products->where('stock.current_stock', '>', 0)->count()) }}</div>
         </div>
         <div class="summary-item">
             <div class="summary-label"><i class="fas fa-coins"></i> إجمالي الرصيد</div>
@@ -291,38 +322,49 @@
     </div>
 
     <div class="table-wrapper">
-        <table>
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th style="width: 20%;">#</th>
                     <th style="width: 50%;"><i class="fas fa-ruler"></i> المقاس</th>
                     <th style="width: 30%;"><i class="fas fa-cubes"></i> الكمية</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($sizeTotals as $size => $total)
-                    @if($total > 0)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td class="size-name">{{ $size }}</td>
-                        <td class="quantity">{{ number_format($total) }} <span style="font-size: 12px; color: #666;">قطعة</span></td>
+                </thead>
+                <tbody>
+                    @forelse($sortedSizes as $index => $size)
+                        @php $total = $sizeTotals[$size]; @endphp
+                        @if($total > 0)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td class="size-name">{{ $size }}</td>
+                            <td class="quantity">{{ number_format($total) }} <span style="font-size: 12px; color: #666;">قطعة</span></td>
+                        </tr>
+                        @endif
+                    @empty
+                        @if($missingSizeTotal == 0)
+                        <tr>
+                            <td colspan="3" class="no-data"><i class="fas fa-inbox"></i> لا توجد بيانات متاحة</td>
+                        </tr>
+                        @endif
+                    @endforelse
+
+                    <!-- عرض الأصناف بدون مقاس -->
+                    @if($missingSizeTotal > 0)
+                    <tr class="size-missing">
+                        <td>{{ count($sizeTotals) + 1 }}</td>
+                        <td class="size-name"><i class="fas fa-exclamation-triangle"></i> بدون مقاس</td>
+                        <td class="quantity">{{ number_format($missingSizeTotal) }} <span style="font-size: 12px;">قطعة</span></td>
                     </tr>
                     @endif
-                @empty
-                    <tr>
-                        <td colspan="3" class="no-data"><i class="fas fa-inbox"></i> لا توجد بيانات متاحة</td>
+                </tbody>
+                @if($totalStock > 0)
+                <tfoot>
+                    <tr style="background: #e9ecef; font-weight: bold;">
+                        <td colspan="2" style="text-align: left;"><i class="fas fa-calculator"></i> الإجمالي الكلي</td>
+                        <td class="quantity">{{ number_format($totalStock) }} قطعة</td>
                     </tr>
-                @endforelse
-            </tbody>
-            @if(count($sizeTotals) > 0)
-            <tfoot>
-                <tr style="background: #e9ecef; font-weight: bold;">
-                    <td colspan="2" style="text-align: left;"><i class="fas fa-calculator"></i> الإجمالي الكلي</td>
-                    <td class="quantity">{{ number_format($totalStock) }} قطعة</td>
-                </tr>
-            </tfoot>
-            @endif
-        </table>
+                </tfoot>
+                @endif
+            </table>
     </div>
 </div>
 

@@ -1,15 +1,17 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\Customer;
+use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 
 class OrderController extends Controller
 {
@@ -17,9 +19,6 @@ class OrderController extends Controller
     // الطلبيات العامة (للجميع)
     // ===========================
 
-    /**
-     * عرض التقارير الرئيسية - المبيعات حسب نوع الصنف ونوع المخزن
-     */
     public function frontPage(Request $request)
     {
         if (Auth::user()->is_admin != 1) {
@@ -59,10 +58,14 @@ class OrderController extends Controller
                 foreach ($order->items as $item) {
                     if ($item->product && $item->product->type) {
                         $productType = $item->product->type;
+                        $itemTotal = $item->total;
+                        if ($order->order_discount > 0) {
+                            $itemTotal = $itemTotal - ($itemTotal * $order->order_discount / 100);
+                        }
                         if (isset($typeSales[$productType])) {
-                            $typeSales[$productType] += $item->total;
+                            $typeSales[$productType] += $itemTotal;
                         } else {
-                            $typeSales['أخرى'] += $item->total;
+                            $typeSales['أخرى'] += $itemTotal;
                         }
                     }
                 }
@@ -72,14 +75,25 @@ class OrderController extends Controller
             $warehouseStats = [];
             foreach ($warehouseTypes as $warehouse) {
                 $warehouseOrders = $orders->where('warehouse_type', $warehouse);
+                $totalQty = 0;
+                foreach ($warehouseOrders as $wo) {
+                    foreach ($wo->items as $item) {
+                        $totalQty += $item->grade1;
+                    }
+                }
                 $warehouseStats[$warehouse] = [
                     'orders_count' => $warehouseOrders->count(),
-                    'total_quantity' => $warehouseOrders->sum(fn($o) => $o->getTotalQuantity()),
+                    'total_quantity' => $totalQty,
                 ];
             }
 
             $totalOrders = $orders->count();
-            $totalQuantity = $orders->sum(fn($o) => $o->getTotalQuantity());
+            $totalQuantity = 0;
+            foreach ($orders as $order) {
+                foreach ($order->items as $item) {
+                    $totalQuantity += $item->grade1;
+                }
+            }
 
             return view('orders.front', [
                 'typeSales' => $typeSales,
@@ -101,9 +115,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * عرض كل الطلبيات (للمدير العام ومدير المبيعات)
-     */
     public function index()
     {
         if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
@@ -120,9 +131,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * عرض تفاصيل طلبية واحدة
-     */
     public function show($id)
     {
         try {
@@ -150,7 +158,12 @@ class OrderController extends Controller
             $user = Auth::user();
             $orders = $user->orders()->with('items')->latest()->paginate(10);
             $totalOrders = $user->orders()->count();
-            $totalItems = OrderItem::whereHas('order', fn($q) => $q->where('user_id', $user->id))->sum('total');
+            $totalItems = 0;
+            foreach ($user->orders as $order) {
+                foreach ($order->items as $item) {
+                    $totalItems += $item->grade1;
+                }
+            }
 
             return view('orders.user_dashboard', [
                 'orders'      => $orders,
@@ -177,6 +190,9 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * حفظ طلبية جديدة
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -189,6 +205,7 @@ class OrderController extends Controller
             'driver_name'    => 'nullable|string',
             'date'           => 'required|date',
             'notes'          => 'nullable|string',
+            'order_discount' => 'nullable|numeric|min:0|max:100',
             'items'          => 'required|array|min:1',
             'items.*.item_code' => 'required|string',
             'items.*.name'      => 'required|string',
@@ -198,8 +215,19 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
+            // البحث عن العميل أو إنشاؤه
+            $customer = Customer::firstOrCreate(
+                ['name' => $validated['customer_name']],
+                [
+                    'type' => 'dealer',
+                    'discount_rate' => 0,
+                ]
+            );
+
+            // إنشاء الطلبية
             $order = Order::create([
                 'user_id'        => Auth::id(),
+                'customer_id'    => $customer->id,
                 'customer_name'  => $validated['customer_name'],
                 'trader_name'    => $validated['trader_name'],
                 'order_number'   => $validated['order_number'],
@@ -209,9 +237,13 @@ class OrderController extends Controller
                 'driver_name'    => $validated['driver_name'],
                 'date'           => $validated['date'],
                 'notes'          => $validated['notes'],
-                'status'         => 'جديدة'
+                'status'         => 'جديدة',
+                'order_discount' => $validated['order_discount'] ?? 0,
             ]);
 
+            $totalAmount = 0;
+
+            // إضافة الأصناف
             foreach ($validated['items'] as $itemData) {
                 if (empty($itemData['item_code']) || $itemData['quantity'] < 0.01) {
                     continue;
@@ -225,6 +257,7 @@ class OrderController extends Controller
                     throw new \Exception('الصنف غير موجود: ' . $itemData['item_code']);
                 }
 
+                // خصم الرصيد من المخزن
                 $stock = ProductStock::where('product_id', $product->id)->first();
                 if ($stock) {
                     if ($stock->current_stock >= $quantity) {
@@ -236,6 +269,9 @@ class OrderController extends Controller
                     throw new \Exception("لا يوجد رصيد مسجل للصنف: {$product->name}");
                 }
 
+                // حساب الإجمالي قبل الخصم
+                $itemTotal = $quantity * ($product->price ?? 0);
+
                 OrderItem::create([
                     'order_id'   => $order->id,
                     'product_id' => $product->id,
@@ -244,11 +280,36 @@ class OrderController extends Controller
                     'grade1'     => $quantity,
                     'grade2'     => 0,
                     'grade3'     => 0,
-                    'total'      => $quantity
+                    'unit_price' => $product->price ?? 0,
+                    'total'      => $itemTotal,
                 ]);
+
+                $totalAmount += $itemTotal;
             }
 
+            // تطبيق خصم الإذن على الإجمالي الكلي
+            if ($order->order_discount > 0) {
+                $totalAmount = $totalAmount - ($totalAmount * $order->order_discount / 100);
+            }
+
+            // تحديث إجمالي الطلبية
+            $order->update(['total_amount' => $totalAmount]);
+
+            // إنشاء المسحوبات
+            Withdrawal::create([
+                'customer_id' => $customer->id,
+                'order_id'    => $order->id,
+                'amount'      => $totalAmount,
+                'date'        => $order->date,
+                'notes'       => 'طلبية جديدة',
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+
             DB::commit();
+
+            // ❌ تم تعطيل فحص المخزون المنخفض لتجنب الإشعارات المكررة
+            // \App\Models\Product::checkAllProductsLowStock();
 
             if (Auth::user()->role == 'sales_rep') {
                 try {
@@ -319,6 +380,7 @@ class OrderController extends Controller
                 'driver_name'   => 'nullable|string',
                 'date'          => 'required|date',
                 'notes'         => 'nullable|string',
+                'order_discount' => 'nullable|numeric|min:0|max:100',
                 'items'         => 'required|array',
             ]);
 
@@ -334,7 +396,10 @@ class OrderController extends Controller
                 'driver_name'    => $validated['driver_name'],
                 'date'           => $validated['date'],
                 'notes'          => $validated['notes'],
+                'order_discount' => $validated['order_discount'] ?? 0,
             ]);
+
+            $totalAmount = 0;
 
             foreach ($validated['items'] as $itemData) {
                 if (isset($itemData['id'])) {
@@ -356,16 +421,31 @@ class OrderController extends Controller
                         }
                     }
 
+                    $itemTotal = $newTotal * ($item->unit_price ?? 0);
                     $item->update([
                         'grade1' => $newTotal,
                         'grade2' => 0,
                         'grade3' => 0,
-                        'total'  => $newTotal
+                        'total'  => $itemTotal,
                     ]);
+                    $totalAmount += $itemTotal;
                 }
             }
 
+            // تطبيق خصم الإذن
+            if ($order->order_discount > 0) {
+                $totalAmount = $totalAmount - ($totalAmount * $order->order_discount / 100);
+            }
+
+            $order->update(['total_amount' => $totalAmount]);
+
+            // تحديث المسحوبات
+            Withdrawal::where('order_id', $order->id)->update(['amount' => $totalAmount]);
+
             DB::commit();
+
+            // ❌ تم تعطيل فحص المخزون المنخفض
+            // \App\Models\Product::checkAllProductsLowStock();
 
             return redirect()->route('orders.show', $order->id)
                 ->with('success', 'تم تحديث الطلبية بنجاح');
@@ -397,12 +477,13 @@ class OrderController extends Controller
                 if ($item->product_id) {
                     $stock = ProductStock::where('product_id', $item->product_id)->first();
                     if ($stock) {
-                        $stock->increaseStock($item->total);
-                        Log::info("تم إعادة {$item->total} وحدة للصنف ID: {$item->product_id}");
+                        $stock->increaseStock($item->grade1);
+                        Log::info("تم إعادة {$item->grade1} وحدة للصنف ID: {$item->product_id}");
                     }
                 }
             }
 
+            Withdrawal::where('order_id', $order->id)->delete();
             OrderItem::where('order_id', $order->id)->delete();
             $order->delete();
 
@@ -446,7 +527,16 @@ class OrderController extends Controller
             $totalOrders = Order::count();
             $totalUsers = \App\Models\User::count();
             $totalProducts = Product::count();
-            $totalRevenue = OrderItem::sum('total');
+            $totalRevenue = 0;
+            foreach (Order::all() as $order) {
+                foreach ($order->items as $item) {
+                    $itemTotal = $item->total;
+                    if ($order->order_discount > 0) {
+                        $itemTotal = $itemTotal - ($itemTotal * $order->order_discount / 100);
+                    }
+                    $totalRevenue += $itemTotal;
+                }
+            }
 
             $recentOrders = Order::with('user')->latest()->take(10)->get();
             $unreadNotifications = auth()->user()->unreadNotifications;
@@ -488,7 +578,12 @@ class OrderController extends Controller
             $orders = $query->get();
 
             $totalOrders = $orders->count();
-            $totalQuantity = $orders->sum(fn($o) => $o->getTotalQuantity());
+            $totalQuantity = 0;
+            foreach ($orders as $order) {
+                foreach ($order->items as $item) {
+                    $totalQuantity += $item->grade1;
+                }
+            }
 
             $userStats = [];
             foreach ($orders->groupBy('user_id') as $userId => $userOrders) {
@@ -497,7 +592,13 @@ class OrderController extends Controller
                     $userStats[] = [
                         'name' => $user->name,
                         'orders_count' => $userOrders->count(),
-                        'total_quantity' => $userOrders->sum(fn($o) => $o->getTotalQuantity()),
+                        'total_quantity' => $userOrders->sum(function($o) {
+                            $qty = 0;
+                            foreach ($o->items as $item) {
+                                $qty += $item->grade1;
+                            }
+                            return $qty;
+                        }),
                     ];
                 }
             }
@@ -514,7 +615,11 @@ class OrderController extends Controller
                             ];
                         }
                         $typeStats[$type]['orders_count']++;
-                        $typeStats[$type]['total_quantity'] += $item->total;
+                        $itemTotal = $item->total;
+                        if ($order->order_discount > 0) {
+                            $itemTotal = $itemTotal - ($itemTotal * $order->order_discount / 100);
+                        }
+                        $typeStats[$type]['total_quantity'] += $itemTotal;
                     }
                 }
             }
@@ -522,7 +627,14 @@ class OrderController extends Controller
             $productStats = [];
             $products = Product::with('stock', 'orderItems')->where('is_active', true)->get();
             foreach ($products as $product) {
-                $soldQuantity = $product->orderItems->sum('total');
+                $soldQuantity = 0;
+                foreach ($product->orderItems as $item) {
+                    $itemTotal = $item->total;
+                    if ($item->order && $item->order->order_discount > 0) {
+                        $itemTotal = $itemTotal - ($itemTotal * $item->order->order_discount / 100);
+                    }
+                    $soldQuantity += $itemTotal;
+                }
                 $ordersCount = $product->orderItems->groupBy('order_id')->count();
                 $productStats[] = [
                     'item_code' => $product->item_code,
@@ -553,9 +665,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * عرض طلبيات المصنع (الطلبيات المرسلة للمصنع فقط)
-     */
     public function factoryOrders()
     {
         if (Auth::user()->role != 'factory' && Auth::user()->role != 'super_admin') {
@@ -576,9 +685,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * تحديث حالة الطلبية (للمصنع) + إرسال إشعار للمديرين
-     */
     public function updateOrderStatus(Request $request, $id)
     {
         if (Auth::user()->role != 'factory' && Auth::user()->role != 'super_admin') {
@@ -597,7 +703,6 @@ class OrderController extends Controller
         $order->factory_notes = $validated['factory_notes'] ?? null;
         $order->save();
 
-        // تسجيل التاريخ
         if (class_exists(\App\Models\OrderStatusHistory::class)) {
             try {
                 \App\Models\OrderStatusHistory::create([
@@ -611,7 +716,6 @@ class OrderController extends Controller
             }
         }
 
-        // إرسال إشعار للمديرين عند تغيير الحالة
         if ($oldStatus != $validated['status']) {
             try {
                 $admins = \App\Models\User::whereIn('role', ['super_admin', 'sales_manager'])->get();
@@ -631,9 +735,6 @@ class OrderController extends Controller
         return back()->with('success', 'تم تحديث حالة الطلبية بنجاح');
     }
 
-    /**
-     * إرسال الطلبية للمصنع (للمدير العام ومدير المبيعات)
-     */
     public function sendToFactory($id)
     {
         if (!in_array(Auth::user()->role, ['super_admin', 'sales_manager'])) {
@@ -648,5 +749,11 @@ class OrderController extends Controller
         $order->save();
 
         return back()->with('success', 'تم إرسال الطلبية للمصنع بنجاح');
+    }
+
+    public function printInvoice($id)
+    {
+        $order = Order::with(['items.product', 'user'])->findOrFail($id);
+        return view('orders.invoice', compact('order'));
     }
 }

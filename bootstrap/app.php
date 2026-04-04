@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\FactoryMiddleware;
 use App\Http\Middleware\SuperAdminMiddleware;
+use App\Http\Middleware\AccountantMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'factory' => FactoryMiddleware::class,
             'super_admin' => SuperAdminMiddleware::class,
+            'accountant' => AccountantMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
